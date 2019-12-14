@@ -16,7 +16,7 @@ src-git luci https://github.com/wifimedia/luci_media.git;wifimedia
 ###Package
 #src-git wifimedia https://github.com/wifimedia/openwifi;WR84x
 #src-git wifimedia https://github.com/wifimedia/openwifi;WR84X_LOOPS
-#src-git wifimedia https://github.com/wifimedia/openwifi;WR940NV6.1
+src-git wifimedia https://github.com/wifimedia/openwifi;WR940NV6.1
 #src-git wifimedia https://github.com/wifimedia/openwifi;Newifi3_anvui
 #src-git wifimedia https://github.com/wifimedia/openwifi;Newifi3_htv
 #src-git wifimedia https://github.com/wifimedia/openwifi;Newifi3
