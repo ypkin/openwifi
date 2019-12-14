@@ -5,7 +5,10 @@ NODOGSPLASH_CONFIG=/tmp/etc/nodogsplash.conf
 PREAUTHENTICATED_ADDRS=/tmp/preauthenticated_addrs
 PREAUTHENTICATED_ADDR_FB=/tmp/preauthenticated_addr_fb
 PREAUTHENTICATED_RULES=/tmp/preauthenticated_rules
-NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
+#NET_ID="nextify"
+NET_ID="lan"
+#FW_ZONE="nextify"
+#IFNAME="nextify0.1" #VLAN1
 walledgadent=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users | sed 's/,/ /g'`
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
@@ -28,8 +31,6 @@ https=`uci -q get wifimedia.@nodogsplash[0].https`
 facebook=`uci -q get wifimedia.@nodogsplash[0].facebook`
 MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 nds_status=`uci -q get nodogsplash.@nodogsplash[0].enabled`
-heartbeat_url=`uci -q get wifimedia.@nodogsplash[0].heartbeat`
-ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 source /lib/functions/network.sh
 config_captive_portal() {
 	if [ $nds_status -eq 0 ];then
@@ -39,8 +40,7 @@ config_captive_portal() {
 	else	
 
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
-		uci set nodogsplash.@nodogsplash[0].gatewayinterface="${NET_ID}";
-		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
+		#uci set nodogsplash.@nodogsplash[0].gatewayinterface="br-${NET_ID}";
 		#uci set nodogsplash.@nodogsplash[0].redirecturl="$redirecturl_default";
 		uci set nodogsplash.@nodogsplash[0].maxclients="$maxclients_default";
 		uci set nodogsplash.@nodogsplash[0].preauthidletimeout="$preauthidletimeout_default";
@@ -49,7 +49,7 @@ config_captive_portal() {
 		uci set nodogsplash.@nodogsplash[0].sessiontimeout="$sessiontimeout_default";
 		uci set nodogsplash.@nodogsplash[0].checkinterval="$ctv";
 		# Whitelist IP
-		for i in portal.nextify.vn static.nextify.vn nextify.vn crm.nextify.vn googletagmanager.com $domain $walledgadent; do
+		for i in portal.nextify.vn static.nextify.vn nextify.vn crm.nextify.vn googletagmanager.com $domain_default $walledgadent; do
 			nslookup ${i} 8.8.8.8 2> /dev/null | \
 				grep 'Address ' | \
 				grep -v '127\.0\.0\.1' | \
@@ -76,27 +76,56 @@ config_captive_portal() {
 		uci del nodogsplash.@nodogsplash[0].preauthenticated_users
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
 		uci commit
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw"
-		if network_get_ipaddr addr "wan"; then
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
-		fi			
-		while read line; do
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80 to $(echo $line)"
-		done <$PREAUTHENTICATED_ADDRS
+		if [ $https == "1" ];then
 
-		if [ "$facebook" == "1" ];then
-		while read fb; do
-			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80 to $(echo $fb)"
-		done <$PREAUTHENTICATED_ADDR_FB
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 172.16.99.1"
+			if network_get_ipaddr addr "wan"; then
+				#echo "IP is $addr"
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
+			fi			
+			while read line; do
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $(echo $line)"
+			done <$PREAUTHENTICATED_ADDRS
+
+			while read fb; do
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80 to $(echo $fb)"
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $fb)"
+			done <$PREAUTHENTICATED_ADDR_FB
+			
+			#while read fb; do
+			#	uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $fb)"
+			#done <$PREAUTHENTICATED_ADDR_FB
+
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 22"
+			#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80"
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"		
+		else
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 172.16.99.1"	
+			if network_get_ipaddr addr "wan"; then
+				#echo "IP is $addr"
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
+			fi		
+			while read line; do
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $(echo $line)"
+			done <$PREAUTHENTICATED_ADDRS
+			if [ "$facebook" == "1" ];then
+			while read fb; do
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80 to $(echo $fb)"
+				uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $fb)"
+			done <$PREAUTHENTICATED_ADDR_FB
+			fi
+			#while read fb; do
+			#	uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443 to $(echo $fb)"
+			#done <$PREAUTHENTICATED_ADDR_FB
+
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 22"
+			#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80"
+			#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
+			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"	
 		fi
-
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 22"
-		#uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 80"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 443"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"	
-
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 22"
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 53"
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow udp port 53"
@@ -111,9 +140,9 @@ config_captive_portal() {
 		/etc/init.d/nodogsplash stop
 		sleep 5
 		/etc/init.d/nodogsplash start
+
 	fi
 	cpn_detect
-	write_login
 }
 
 captive_portal_restart(){
@@ -142,16 +171,81 @@ heartbeat(){
 	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
 	NUM_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Client authentications since start' | cut -d':' -f2 | xargs)
 	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	TOTAL_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Current clients' | cut -d':' -f2 | xargs)
+	#TOTAL_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Current clients' | cut -d':' -f2 | xargs)
 	TOTAL_CLIENTS=$(ndsctl status | grep clients | awk '{print $3}')
 	#Value Jsion
-	#wget -q --timeout=3 \
-	#	 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
-	#	 -O /dev/null
-	captive_portal_restart
 	wget -q --timeout=3 \
-	"http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}&total_clients=${TOTAL_CLIENTS}" \
-	 -O /dev/null
+		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}&total_clients=${TOTAL_CLIENTS}" \
+		 -O /tmp/config_setting
+	get_config	 
+}
+
+setting_config() {
+	local network_1=$(uci -q get wireless.default_radio0.network)
+	local network_2=$(uci -q get wireless.default_radio1.network)
+	local md5ndsconfig=`uci -q get wifimedia.@nodogsplash[0].md5sum`
+	local checkmd5file=`md5sum /tmp/config_setting | awk '{print $1}'`
+	while read line;do
+	
+		if [ "$(echo $line | grep SSID:)" ];then
+			#if [ "$network_1"  == "nextify" ];then
+				if [ "$(echo $line | awk '{print $2}')" != "" ];then
+					uci set wireless.default_radio0.ssid="$(echo $line | awk '{print $2}')"
+				fi
+			#fi 
+			
+			#if [ "$network_2"  == "nextify" ];then
+				if [ "$(echo $line | awk '{print $2}')" != "" ];then
+					uci set wireless.default_radio1.ssid="$(echo $line | awk '{print $2}')"
+				fi
+			#fi 				
+			
+		elif [ "$(echo $line | grep 'PASSWORD:')" ];then 
+			#if [ "$network_1"  == "nextify" ];then
+			#echo $line | awk '{print $2}'
+				if [ "$(echo $line | awk '{print $2}')" == "" ];then
+					uci delete wireless.default_radio0.encryption &> /dev/null
+					uci delete wireless.default_radio0.key &> /dev/null
+					uci delete wireless.default_radio0.rsn_preauth &> /dev/null
+				else	
+					uci set wireless.default_radio0.encryption="psk2"
+					uci set wireless.default_radio0.key="$(echo $line | awk '{print $2}')"
+					uci set wireless.default_radio0.rsn_preauth=1
+					
+				fi
+			#fi		
+			#if [ "$network_2"  == "nextify" ];then
+			#echo $line | awk '{print $2}'
+				if [ "$(echo $line | awk '{print $2}')" == "" ];then
+					uci delete wireless.default_radio1.encryption &> /dev/null
+					uci delete wireless.default_radio1.key &> /dev/null
+					uci delete wireless.default_radio1.rsn_preauth &> /dev/null
+				else	
+					uci set wireless.default_radio1.encryption="psk2"
+					uci set wireless.default_radio1.key="$(echo $line | awk '{print $2}')"
+					uci set wireless.default_radio1.rsn_preauth=1
+					
+				fi
+			#fi	
+		elif [ "$(echo $line | grep SESSIONTIMEOUT:)" ];then
+			uci set nodogsplash.@nodogsplash[0].sessiontimeout="$(echo $line | awk '{print $2}')";
+			uci set wifimedia.@nodogsplash[0].sessiontimeout="$(echo $line | awk '{print $2}')";
+		elif [ "$(echo $line | grep SERVICE:)" ];then
+			if [ "$(echo $line | awk '{print $2}')" == "enable" ];then
+				uci set nodogsplash.@nodogsplash[0].enabled='1'
+				/etc/init.d/nodogsplash enable
+			else	
+				uci set nodogsplash.@nodogsplash[0].enabled='0'
+				/etc/init.d/nodogsplash disable
+			fi	
+		fi
+	done < /tmp/config_setting
+
+	uci commit wireless && wifi
+	uci commit wifimedia
+	uci commit nodogsplash
+	/etc/init.d/nodogsplash stop
+	/etc/init.d/nodogsplash start
 }
 
 get_captive_portal_clients() {
@@ -190,12 +284,24 @@ get_captive_portal_clients() {
              traffic_download=
              traffic_upload=
          fi
-    done
-	#clients_ndsclt=$(cat /tmp/captive_portal_clients | xargs| sed 's/;/,/g'| tr a-z A-Z)
+     done
+	 clients_ndsclt=$(cat /tmp/captive_portal_clients | xargs| sed 's/;/,/g'| tr a-z A-Z)
 	###2>/dev/null
-	#wget --post-data="clients=${clients_ndsclt}&gateway_mac=${global_device}" http://api.nextify.vn/clients_around 2>/dev/null
-    #rm /tmp/captive_portal_clients	
+	wget --post-data="clients=${clients_ndsclt}&gateway_mac=${global_device}" http://api.nextify.vn/clients_around 2>/dev/null
+    rm /tmp/captive_portal_clients	
  }
+ 
+get_config(){
+	if [ "$md5ndsconfig" != "$checkmd5file" ];then
+		echo "new config .........."
+		
+		uci set wifimedia.@nodogsplash[0].md5sum=$checkmd5file
+		uci commit wifimedia
+		setting_config
+	else
+		echo "maintain the existing settings "
+	fi
+}
 
 write_login(){
 
@@ -207,7 +313,8 @@ write_login(){
 		  <title>$gatewayname</title>
 	  </head>
 	  <body>
-		  <form id="info" method="GET" action="//'$domain_default'">
+		  <form id="info" method="POST" action="//'$domain_default'">
+			  <input type="hidden" name="gateway_name" value="$gatewayname">
 			  <input type="hidden" name="gateway_mac" value="'$MAC_E0'">
 			  <input type="hidden" name="client_mac" value="$clientmac">
 			  <input type="hidden" name="num_clients" value="$nclients">
@@ -241,39 +348,18 @@ dhcp_extension(){
 	relay=`uci -q get network.local`
 	uci del network.local.network
 	if [ $relay != "" ];then
-		if [ $NET_ID = "br-hotspot" ];then
-			uci set network.local.ipaddr='10.68.255.1'
-			uci add_list network.local.network='hotspot'
-			uci set dhcp.hotspot.ignore='1'
-			uci set wireless.default_radio0.network='hotspot'
-			uci set wireless.default_radio1.network='hotspot'
-		else
-			uci set network.local.ipaddr='172.16.99.1'
-			uci add_list network.local.network='lan'
-			uci set dhcp.lan.ignore='1'
-			uci set wireless.default_radio0.network='lan'
-			uci set wireless.default_radio1.network='lan'
-		fi	
+		uci add_list network.local.network='lan'
 		uci add_list network.local.network='wan'
-	else
-		NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
-		if [ $NET_ID = "br-hotspot" ];then
-			uci set wireless.default_radio0.network='hotspot'
-			uci set wireless.default_radio1.network='hotspot'
-		else
-			uci set wireless.default_radio0.network='lan'
-			uci set wireless.default_radio1.network='lan'
-		fi	
-		uci set dhcp.lan.ignore='0'
-		uci set dhcp.hotspot.ignore='0'
+		uci commit network
+		#/etc/init.d/network restart
+	fi
+}
 
-	fi
-	uci commit && wifi up
-}
 cpn_detect(){
-	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpnurl`
+	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn`
 	if [ $cpn_status -eq 0 ];then
-		echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
+		echo '*/5 * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
 	fi
 }
+
 "$@"

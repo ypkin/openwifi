@@ -2,7 +2,6 @@
 
 rnd=`cat /dev/urandom | tr -dc 'A-Z' | head -c1`
 model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
-newifi3=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | awk '{print $1}')
 uci -q get system.@reset_all[0] || {
 	uci batch <<-EOF
 	add system reset_all
@@ -18,7 +17,6 @@ uci -q get wifimedia.@sync[0] || {
 	set wifimedia.@sync[0]=sync
 	set wifimedia.@sync[0].version=2.1.0
 	#set wifimedia.@sync[0].domain="crm.wifimedia.com.vn"
-	set wifimedia.@sync[0].server="http://monitor.wifimedia.vn/api/monitoring/"
 	commit wifimedia
 EOF
 }
@@ -53,15 +51,6 @@ uci -q get wifimedia.@hash256[0] || {
 	uci batch <<-EOF
 	add wifimedia hash256
 	set wifimedia.@hash256[0]=hash256
-	commit wifimedia
-EOF
-}
-
-uci -q get wifimedia.@LTE[0] || {
-	uci batch <<-EOF
-	add wifimedia LTE
-	set wifimedia.@LTE[0]=lte
-	set wifimedia.@LTE[0].lte=0
 	commit wifimedia
 EOF
 }
@@ -107,32 +96,6 @@ if [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND
 
 fi
 
-
-if [ "$newifi3" == "Newifi-D2" ];then
-	uci batch <<-EOF
-		set network.lan.ipaddr=172.16.99.1
-		set network.wan.type=bridge
-		delete network.globals
-		set dhcp.lan.force=1
-		set dhcp.lan.netmask=255.255.255.0
-		add_list dhcp.lan.dhcp_option=6,8.8.8.8,8.8.4.4
-		commit
-	EOF
-
-	uci batch <<-EOF
-		set wireless.default_radio0.maxassoc=30
-		set wireless.@wifi-iface[0].ssid=OPENWIFI
-		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
-		#set wireless.@wifi-iface[0].encryption="psk2"
-		#set wireless.@wifi-iface[0].key="123456A@$rnd"
-		set wireless.radio0.disabled=0
-		commit wireless
-	EOF
-
-fi
-
-
-
 if [ "$model_hardware" == "TL-WR840N_v6" ] || [ "$model_hardware" == "TL-WR841N_v14" ] || [ "$model_hardware" == "TL-WR840N_v4" ] || [ "$model_hardware" == "TL-WR841N_v13" ] || [ "$model_hardware" == "TL-WR840N_v5" ];then
 	uci batch <<-EOF
 		set network.lan.ipaddr=192.168.5.1
@@ -153,6 +116,9 @@ if [ "$model_hardware" == "TL-WR840N_v6" ] || [ "$model_hardware" == "TL-WR841N_
 		set wireless.@wifi-iface[0].disabled=0
 		commit wireless
 	EOF
+	cat /root/advance_model.lua >/usr/lib/lua/luci/model/cbi/wifimedia_module/advance.lua
+	cat /root/gw_index.htm >/usr/lib/lua/luci/view/admin_status/index.htm
+	cat /root/wifi_overview.htm >/usr/lib/lua/luci/view/admin_network/wifi_overview.htm
 fi
 
 if [ "$model_hardware" == "TL-WR840N_v4" ];then
@@ -181,8 +147,6 @@ elif [ "$model_hardware" == "CF-E320N_v2" ];then
 	echo "EAP320v2" >/etc/hardware
 	uci set meshdesk.settings.id_if="eth1"
 	uci commit meshdesk
-elif [ "$newifi3" == "Newifi-D2" ];then
-	echo "NEWIFI" >/etc/hardware	
 fi
 
 #Add vitual SSID
@@ -201,24 +165,24 @@ fi
 
 
 uci batch <<-EOF
-	set wireless.radio1.channel=157
-	#set wireless.radio1.htmode=VHT40
-	#set wireless.default_radio1.ssid="VIETNAM POST"
-	set wireless.radio0.country="US"
-	set wireless.radio1.txpower=25
+	#set wireless.radio0.channel=157
+	#set wireless.@wifi-device[-1].channel=6
+	#set wireless.radio0.disabled=0
+	#set wireless.radio1.disabled=0
 #5G
 	set wireless.default_radio0.ssid="OPENWIFI"
 	#set wireless.default_radio0.macaddr=40:A5:EF:63:E7:6D
-
-	#set wireless.default_radio0.maxassoc=30
+	#set wireless.default_radio1.ssid="VIETNAM POST"
+	#set wireless.default_radio1.maxassoc=30
 	set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
 	add_list wireless.radio0.ht_capab="SHORT-GI-20"
 	add_list wireless.radio0.ht_capab="SHORT-GI-40"
 	add_list wireless.radio0.ht_capab="RX-STBC1"
 	add_list wireless.radio0.ht_capab="DSSS_CCK-40"
 	set wireless.radio0.country="US"
-	set wireless.radio0.txpower=29
-	set wireless.radio0.channel=auto
+	set wireless.radio0.txpower=22
+	#set wireless.radio0.htmode=VHT40
+	#set wireless.radio1.txpower=20
 	commit wireless
 EOF
 #enable wifi
@@ -236,9 +200,9 @@ uci batch <<-EOF
 	commit firewall
 	EOF
 	
-NET_ID="hotspot"
-FW_ZONE="hotspot"
-IFNAME="eth0.300" #VLAN1
+NET_ID="private"
+FW_ZONE="private"
+IFNAME="eth0.1" #VLAN1
 uci batch << EOF
 	set network.${NET_ID}=interface
 	set network.${NET_ID}.ifname=${IFNAME}
@@ -279,32 +243,7 @@ uci batch << EOF
 	commit network
 	commit dhcp
 EOF
-
-LTE_ZONE="4glte"
-LTE_INT="lte"
-uci batch << EOF
-	set firewall.${LTE_ZONE}=zone
-	set firewall.${LTE_ZONE}.input=ACCEPT
-	set firewall.${LTE_ZONE}.forward=ACCEPT
-	set firewall.${LTE_ZONE}.output=ACCEPT
-	set firewall.${LTE_ZONE}.name=${LTE_INT}
-	set firewall.${LTE_ZONE}.masq=1
-	set firewall.${LTE_ZONE}.network=${LTE_INT}
-	set firewall.${LTE_ZONE}_fwd_lan=forwarding
-	set firewall.${LTE_ZONE}_fwd_lan.dest=lan
-	set firewall.${LTE_ZONE}_fwd_lan.src=${LTE_INT}
-	set firewall.${LTE_ZONE}_fwd_lte=forwarding
-	set firewall.${LTE_ZONE}_fwd_lte.dest=${LTE_INT}
-	set firewall.${LTE_ZONE}_fwd_lte.src=lan
-	set firewall.${LTE_ZONE}_fwd_p=forwarding
-	set firewall.${LTE_ZONE}_fwd_p.dest=${NET_ID}
-	set firewall.${LTE_ZONE}_fwd_p.src=${LTE_INT}
-	set firewall.${LTE_ZONE}_fwd_lte_p=forwarding
-	set firewall.${LTE_ZONE}_fwd_lte_p.dest=${LTE_INT}
-	set firewall.${LTE_ZONE}_fwd_lte_p.src=${NET_ID}
-	commit firewall
-EOF
-
+	
 #Password	
 echo -e "admin:x:1000:1000:admin:/root:/bin/false" >>/etc/passwd
 echo -e "admin:*:0:0:99999:7:::" >>/etc/shadow
@@ -321,9 +260,6 @@ pwd=$(echo -n $word | md5sum | awk '{print $1}')
 echo -e "wifimedia\nwifimedia" | passwd root
 #End
 
-#Cron heartbeat
-echo '* * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/root
-
 #Info
 CODENAME="wifimedia"
 if [ -f "/etc/codename" ]; then
@@ -336,14 +272,6 @@ uci batch <<-EOF
 	commit wifimedia
 EOF
 
-#uci batch <<-EOF
-#	del openvpn.@openvpn[0]
-#	del openvpn.@openvpn[1]
-#	del openvpn.@openvpn[2]
-#	del openvpn.@openvpn[3]
-#	commit openvpn
-#EOF
-echo "" >/etc/config/openvpn
 source /etc/openwrt_release
 rm -f /etc/openwrt_release
 DISTRIB_DESCRIPTION=$(uci get wifimedia.Version.ver)""
@@ -406,9 +334,11 @@ rm -f /etc/banner
 mv /etc/banner_ /etc/banner
 /etc/init.d/dropbear restart
 /etc/init.d/network restart
-#/etc/init.d/watchcat start #start watchcat
+/etc/init.d/watchcat start #start watchcat
+rm -f /root/advance_model.lua
+rm -f /root/gw_index.htm
+rm -f /root/wifi_overview.htm
 chmod +x /sbin/wifimedia/*
-/etc/init.d/cron restart
 wifi up
 #rm -f /etc/uci-defaults/wifimedia
 #sleep 5 && reboot

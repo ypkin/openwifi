@@ -118,7 +118,7 @@ if nixio.fs.access("/etc/rc.d/S80privoxy") then
 		luci.util.exec("/etc/init.d/privoxy disable")
 		luci.util.exec(" /etc/init.d/privoxy  stop && /etc/init.d/firewall restart")
 		luci.http.redirect(
-        		luci.dispatcher.build_url("admin", "services", "filter")
+        		luci.dispatcher.build_url("admin", "wifimedia", "filter")
 		)			
   end
 else
@@ -131,7 +131,7 @@ else
 		luci.util.exec(" /etc/init.d/privoxy start ")
 		luci.util.exec("crontab /etc/cron_ads -u adnetwork && /etc/init.d/cron restart")
 		luci.http.redirect(
-        		luci.dispatcher.build_url("admin", "services", "filter")
+        		luci.dispatcher.build_url("admin", "wifimedia", "filter")
 		)			
   end
 end

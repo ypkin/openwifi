@@ -5,10 +5,10 @@ echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 #write file crontabs
 _nds=/etc/cron_nds
 #echo '* * * * * /sbin/wifimedia/captive_portal.sh get_captive_portal_clients' >$_nds
-echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >$_nds
-echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>$_nds
-#echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >/etc/crontabs/nds
-#echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>/etc/crontabs/nds && /etc/init.d/cron restart
+echo '* * * * * /sbin/wifimedia/cpnclients.sh' >$_nds
+echo '* * * * * /sbin/wifimedia/heartbeat.sh' >>$_nds
+echo '* * * * * /sbin/wifimedia/cpnclients.sh' >/etc/crontabs/nds
+echo '* * * * * /sbin/wifimedia/heartbeat.sh' >>/etc/crontabs/nds && /etc/init.d/cron restart
 #NET_ID="nextify"
 #FW_ZONE="nextify"
 #IFNAME="eth0.1" #VLAN1
@@ -24,7 +24,8 @@ echo '<!doctype html>
       <title>$gatewayname</title>
   </head>
   <body>
-      <form id="info" method="GET" action="//'$domain_default'">
+      <form id="info" method="POST" action="//'$domain_default'">
+          <input type="hidden" name="gateway_name" value="$gatewayname">
           <input type="hidden" name="gateway_mac" value="'$MAC_E0'">
           <input type="hidden" name="client_mac" value="$clientmac">
           <input type="hidden" name="num_clients" value="$nclients">
@@ -59,19 +60,48 @@ uci -q get wifimedia.@nodogsplash[0] || {
         add wifimedia nodogsplash
 		set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
 		set wifimedia.@nodogsplash[0].https=0
-		set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
         commit wifimedia
 EOF
 }
 
+#NET_RELAY=relay_ap
+#IFNAME99="eth0.2" #VLAN1
+#uci batch << EOF
+#	set network.${AP_NEXTIFY}=interface
+#	set network.${AP_NEXTIFY}.ifname=${IFNAME99}
+#	set network.${AP_NEXTIFY}.proto=static
+#	set network.${AP_NEXTIFY}.type=bridge
+#	set network.${AP_NEXTIFY}.ipaddr=10.69.255.1
+#	set network.${AP_NEXTIFY}.netmask=255.255.255.0
+#	set dhcp.${AP_NEXTIFY}.ignore=1
+#
+#	set firewall.${FW_ZONE_RELAY}=zone
+#	set firewall.${FW_ZONE_RELAY}.name=${FW_ZONE_RELAY}	
+#	set firewall.${FW_ZONE_RELAY}.forward=ACCEPT
+#	set firewall.${FW_ZONE_RELAY}.output=ACCEPT
+#	set firewall.${FW_ZONE_RELAY}.input=ACCEPT 
+#	set firewall.${FW_ZONE_RELAY}.masq=1 
+#
+#	set firewall.${FW_ZONE_RELAY}_fwd=forwarding
+#	set firewall.${FW_ZONE_RELAY}_fwd.src=${FW_ZONE_RELAY}
+#	set firewall.${FW_ZONE_RELAY}_fwd.dest=wan
+#	#Config Relay WAN-->NET_RELAY
+#
+#	set network.${NET_RELAY}=interface
+#	set network.${NET_RELAY}.proto=relay
+#	set network.${NET_RELAY}.ipaddr=10.69.255.1	
+#	add_list network.${NET_RELAY}.network=${AP_NEXTIFY}
+#	add_list network.${NET_RELAY}.network=wan
+#
+#EOF
 /etc/init.d/nodogsplash disable
 uci set nodogsplash.@nodogsplash[0].enabled='0'
+uci set nodogsplash.@nodogsplash[0].gatewayname="Nextify CRM";
 uci del nodogsplash.@nodogsplash[0].users_to_router
 uci del nodogsplash.@nodogsplash[0].authenticated_users
 uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"
-uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1"
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 172.16.99.1"
 uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 115.84.183.186"
 uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow all"
@@ -87,3 +117,6 @@ uci commit firewall
 /etc/init.d/relayd restart
 #sleep 5
 #iptables -I FORWARD -o br-wan -d $(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }') -j ACCEPT
+
+
+

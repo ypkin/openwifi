@@ -126,7 +126,7 @@ if nixio.fs.access("/etc/rc.d/S99wifi_portal") then
 		luci.util.exec("/etc/init.d/wifi_portal disable")
 		luci.util.exec("/etc/init.d/wifi_portal stop && /etc/init.d/network restart")
 		luci.http.redirect(
-        		luci.dispatcher.build_url("admin", "services", "hotspot")
+        		luci.dispatcher.build_url("admin", "wifimedia", "hotspot")
 		)
   end
 else
@@ -136,7 +136,7 @@ else
 		luci.util.exec("/etc/init.d/update_ip enable")
 		luci.util.exec("/etc/init.d/wifi_portal enable")
 		luci.http.redirect(
-        		luci.dispatcher.build_url("admin", "services", "hotspot")
+        		luci.dispatcher.build_url("admin", "wifimedia", "hotspot")
 		)
   end
 end

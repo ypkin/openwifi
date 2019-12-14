@@ -22,7 +22,7 @@ s.addremove = false
 s:tab("basic","Basic")
 s:tab("advance","Advanced")
 s:tab("network","Network")
-s:taboption( "basic",Value, "domain","Captive portal url","portal.nextify.vn/splash")
+--s:taboption( "basic",Value, "domain","Nextify portal","portal.nextify.vn/splash")
 --s:taboption( "basic",Value, "redirecturl","Redirect URL","https://google.com.vn")
 s:taboption( "basic",Value, "preauthenticated_users","Walled Garden","google.com.vn, vnexpress.net")
 s:taboption( "advance",Value, "maxclients","Maxclients","Max Clients:250")
@@ -31,17 +31,33 @@ s:taboption( "advance",Value, "authidletimeout","Authidletimeout","Default: > 12
 s:taboption( "advance",Value, "sessiontimeout","Sessiontimeout","Default : 120 Mins")
 s:taboption( "advance",Value, "checkinterval","Checkinterval","Default: 10 Mins")
 s:taboption( "basic",Flag, "facebook","Bypass Facebook")
---s:taboption( "basic",Flag, "https","Bypass https")
+s:taboption( "basic",Flag, "https","Bypass https")
 dhcpextension = s:taboption( "basic",Flag, "dhcpextension","DHCP Extension")
-dhcpextension.rmempty = false
-
-cpn = s:taboption( "basic",Flag, "cpnurl","CPN Clients detect")
+dhcpextension.rmempty = falsmaie
+		
+cpn = s:taboption( "basic",Flag, "cpn","CPN Clients detect")
 cpn.rmempty = false
-
-network = s:taboption( "network",ListValue, "network","Interface")
-network:value("br-hotspot", "Hotspot")
-network:value("br-lan", "LAN")
-
+		
+function dhcpextension.write(self, section, value)
+if value == self.enabled then
+		luci.sys.call("uci set network.local='interface'")
+		luci.sys.call("uci set network.local.proto='relay'")
+		luci.sys.call("uci set network.local.ipaddr='172.16.99.1'")
+		--luci.sys.call("uci add_list network.local.network='lan'")
+		--luci.sys.call("uci add_list network.local.network='wan'")
+		luci.sys.call("uci set dhcp.lan.ignore='1' && uci commit dhcp")
+		luci.sys.call("uci set wireless.@wifi-iface[0].network='lan'")
+		--luci.sys.call("uci set nodogsplash.@nodogsplash[0].gatewayinterface='br-lan'")
+	else
+		luci.sys.call("uci del network.local")
+		luci.sys.call("uci set dhcp.lan.ignore='0' && uci commit dhcp")
+		luci.sys.call("uci set wireless.@wifi-iface[0].network='lan'")
+		--luci.sys.call("uci set nodogsplash.@nodogsplash[0].gatewayinterface='br-private'")
+	end
+	return Flag.write(self, section, value)
+end
+		-- retain server list even if disabled
+function dhcpextension.remove() end
 
 function cpn.write(self, section, value)
 if value == self.enabled then
@@ -53,29 +69,6 @@ if value == self.enabled then
 end
 		-- retain server list even if disabled
 function cpn.remove() end
-	
-function dhcpextension.write(self, section, value)
-if value == self.enabled then
-		luci.sys.call("uci set network.local='interface'")
-		luci.sys.call("uci set network.local.proto='relay'")
-		--luci.sys.call("uci set network.local.ipaddr='172.16.99.1'")
-		--luci.sys.call("uci add_list network.local.network='lan'")
-		--luci.sys.call("uci add_list network.local.network='wan'")
-		--luci.sys.call("uci set dhcp.lan.ignore='1' && uci commit dhcp ")
-		--luci.sys.call("uci set wireless.@wifi-iface[0].network='lan' && uci commit network")
-		--luci.sys.call("uci set nodogsplash.@nodogsplash[0].gatewayinterface='br-lan'")
-		luci.sys.call("uci commit")
-	else
-		luci.sys.call("uci del network.local")
-		--luci.sys.call("uci set dhcp.hotspot.ignore='0' && uci commit dhcp")
-		--luci.sys.call("uci set wireless.@wifi-iface[0].network='hotspot' && uci commit network")
-		--luci.sys.call("uci set nodogsplash.@nodogsplash[0].gatewayinterface='br-private'")
-		luci.sys.call("uci commit")
-	end
-	return Flag.write(self, section, value)
-end
-		-- retain server list even if disabled
-function dhcpextension.remove() end
 
 
 local pid = luci.util.exec("pidof nodogsplash")
@@ -109,8 +102,8 @@ t:option(DummyValue, "status","Captive portal status")
 	  disable = t:option(Button, "_disable","Disable Startup")
 	  disable.inputstyle = "remove"
 	  function disable.write(self, section)
+			--luci.util.exec("/sbin/wifimedia/del_network_nds.sh")
 			luci.sys.exec("uci set nodogsplash.@nodogsplash[0].enabled='0' && uci commit nodogsplash")
-			luci.util.exec("echo '* * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/roots")
 			luci.util.exec("echo ''>/etc/crontabs/nds && /etc/init.d/cron restart")
 			luci.util.exec("/etc/init.d/nodogsplash disable && /etc/init.d/nodogsplash stop")
 			luci.http.redirect(
@@ -121,9 +114,10 @@ t:option(DummyValue, "status","Captive portal status")
 	  enable = t:option(Button, "_enable","Enable Startup")
 	  enable.inputstyle = "apply"
 	  function enable.write(self, section)
+			--luci.util.exec("/sbin/wifimedia/preauthenticated_rules.sh")
 			luci.sys.call("uci set nodogsplash.@nodogsplash[0].enabled='1' && uci commit nodogsplash")
-			luci.util.exec("echo '' >/etc/crontabs/roots")
-			luci.util.exec("crontab /etc/cron_nds -u nds && /etc/init.d/cron restart")
+			luci.sys.call("echo '* * * * * /sbin/wifimedia/heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart")
+			--luci.util.exec("crontab /etc/cron_nds -u nds && /etc/init.d/cron restart")
 			luci.util.exec("/etc/init.d/nodogsplash enable")
 			luci.http.redirect(
             		luci.dispatcher.build_url("admin", "services", "wifimedia_portal")

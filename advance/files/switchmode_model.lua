@@ -24,7 +24,7 @@ switch_mode.rmempty = false
 			if value == self.enabled then
 				luci.sys.call("uci delete network.lan")
 				luci.sys.call("uci set network.wan.proto='dhcp'")
-				luci.sys.call("uci set network.wan.ifname='eth0.1 eth0.2'")
+				luci.sys.call("uci set network.wan.ifname='eth0 eth1.1'")
 				luci.sys.call("uci set wireless.@wifi-iface[0].network='wan'")
 				luci.sys.call("uci commit")
 			else
@@ -33,12 +33,12 @@ switch_mode.rmempty = false
 				luci.sys.call("uci set network.lan.ipaddr='172.16.99.1'")
 				luci.sys.call("uci set network.lan.netmask='255.255.255.0'")
 				luci.sys.call("uci set network.lan.type='bridge'")
-				luci.sys.call("uci set network.lan.ifname='eth0.1'")
+				luci.sys.call("uci set network.lan.ifname='eth1.1'")
 				luci.sys.call("uci set dhcp.lan.force='1'")
 				luci.sys.call("uci set dhcp.lan.netmask='255.255.255.0'")
 				luci.sys.call("uci del dhcp.lan.dhcp_option")
 				luci.sys.call("uci add_list dhcp.lan.dhcp_option='6,8.8.8.8,8.8.4.4'")				
-				luci.sys.call("uci set network.wan.ifname='eth0.2'")
+				luci.sys.call("uci set network.wan.ifname='eth0'")
 				luci.sys.call("uci set wireless.@wifi-iface[0].network='wan'")
 				luci.sys.call("uci commit")		
 			end
