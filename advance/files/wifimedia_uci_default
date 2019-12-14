@@ -2,13 +2,6 @@
 
 rnd=`cat /dev/urandom | tr -dc 'A-Z' | head -c1`
 model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
-uci -q get system.@reset_all[0] || {
-	uci batch <<-EOF
-	add system reset_all
-	set system.@reset_all[0]=reset_all
-	commit system
-EOF
-}
 
 ###Sync
 uci -q get wifimedia.@sync[0] || {
@@ -26,7 +19,7 @@ uci -q get wifimedia.@builddate[0] || {
 	uci batch <<-EOF
 	add wifimedia builddate
 	set wifimedia.@builddate[0]=builddate
-	set wifimedia.@builddate[0].date=24/10/2019
+	set wifimedia.@builddate[0].date=14/12/2019
 	commit wifimedia
 EOF
 }
@@ -116,29 +109,14 @@ if [ "$model_hardware" == "TL-WR840N_v6" ] || [ "$model_hardware" == "TL-WR841N_
 		set wireless.@wifi-iface[0].disabled=0
 		commit wireless
 	EOF
-	cat /root/advance_model.lua >/usr/lib/lua/luci/model/cbi/wifimedia_module/advance.lua
-	cat /root/gw_index.htm >/usr/lib/lua/luci/view/admin_status/index.htm
-	cat /root/wifi_overview.htm >/usr/lib/lua/luci/view/admin_network/wifi_overview.htm
 fi
 
-if [ "$model_hardware" == "TL-WR840N_v4" ];then
-	echo "TL-WR840N v4" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR741ND_v4" ];then
-	echo "TL-WR740N v4" >/etc/hardware		
-elif [ "$model_hardware" == "TL-WA901ND_v3" ];then
-	echo "TL-WA901ND v3" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR841N_v13" ];then
-	echo "TL-WR841N v13" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR940N_v4" ];then
+if [ "$model_hardware" == "TL-WR940N_v4" ];then
 	echo "TL-WR940N v5" >/etc/hardware
 elif [ "$model_hardware" == "TL-WR940N_v6" ];then
 	echo "TL-WR940N v6.1" >/etc/hardware
 elif [ "$model_hardware" == "TL-WR941N/ND_v6" ];then
 	echo "TL-WR940N v3" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR840N_v5" ];then
-	echo "TL-WR840N v5" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR841N_v14" ];then
-	echo "TL-WR840N v6" >/etc/hardware
 elif [ "$model_hardware" == "CF-E355AC_v2" ];then
 	echo "EAP35AC v2" >/etc/hardware
 	uci set meshdesk.settings.id_if="eth1"
@@ -148,21 +126,6 @@ elif [ "$model_hardware" == "CF-E320N_v2" ];then
 	uci set meshdesk.settings.id_if="eth1"
 	uci commit meshdesk
 fi
-
-#Add vitual SSID
-#For abng
-#uci -q get wireless.@wifi-iface[1] || {
-#        uci batch <<EOF
-#        add wireless wifi-iface
-#        set wireless.@wifi-iface[1].device=radio0
-#        set wireless.@wifi-iface[1].mode=ap
-#        set wireless.@wifi-iface[1].network=lan
-#        set wireless.@wifi-iface[1].ssid=OPENWIFIx2
-#		set wireless.@wifi-iface[1].disabled=1
-#        commit wireless
-#EOF
-#}
-
 
 uci batch <<-EOF
 	#set wireless.radio0.channel=157
@@ -282,10 +245,6 @@ echo 'DISTRIB_CODENAME="'"$DISTRIB_CODENAME"'"' >> /etc/openwrt_release
 echo 'DISTRIB_TARGET="'"$DISTRIB_TARGET"'"' >> /etc/openwrt_release
 echo 'DISTRIB_DESCRIPTION="'"$DISTRIB_DESCRIPTION"'"' >> /etc/openwrt_release
 
-#rm -f /etc/privoxy/default.action
-#rm -f /etc/privoxy/default.filter
-
-#chmod a+x /sbin/wifimedia/*.sh
 /etc/init.d/system reload
 /etc/init.d/led reload
 
@@ -310,16 +269,6 @@ uci batch <<-EOF
 	commit system
 EOF
 /etc/init.d/sysntpd start >/dev/null
-##LED XIAOMI-MIWIFI
-#uci batch <<-EOF
-#	set system.led_power.name='power'
-#	set system.led_power.default='1'
-#	set system.led_power.trigger='netdev'
-#	set system.led_power.dev='br-wan'
-#	set system.led_power.mode='link tx rx'
-#	set system.led_power.sysfs='xiaomi:blue:status'
-#	commit system
-#EOF
 uci set luci.diag.dns="google.com.vn"
 uci set luci.diag.ping="google.com.vn"
 uci set luci.diag.route="google.com.vn"
@@ -335,9 +284,6 @@ mv /etc/banner_ /etc/banner
 /etc/init.d/dropbear restart
 /etc/init.d/network restart
 /etc/init.d/watchcat start #start watchcat
-rm -f /root/advance_model.lua
-rm -f /root/gw_index.htm
-rm -f /root/wifi_overview.htm
 chmod +x /sbin/wifimedia/*
 wifi up
 #rm -f /etc/uci-defaults/wifimedia

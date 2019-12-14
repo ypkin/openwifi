@@ -292,7 +292,7 @@ curl_result=$?
 if [ "${curl_result}" -eq 0 ]; then
 	if grep -q "." $licensekey; then
 		cat "$licensekey" | while read line ; do
-			if [ "$(echo $line | grep $wr940_device)" ] ;then
+			if [ "$(echo $line | grep $_device)" ] ;then
 				#Update License Key
 				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
@@ -360,7 +360,7 @@ wget -q "${blacklist}" -O $find_mac_gateway
 curl_result=$?
 if [ "${curl_result}" -eq 0 ]; then
 	cat "$find_mac_gateway" | while read line ; do
-		if [ "$(echo $line | grep $wr940_device)" ] ;then
+		if [ "$(echo $line | grep $_device)" ] ;then
 			wifi down
 			ifdown lan
 		fi
