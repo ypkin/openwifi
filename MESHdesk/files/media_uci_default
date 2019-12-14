@@ -1,0 +1,16 @@
+#!/bin/sh
+
+rnd=`cat /dev/urandom | tr -dc 'A-Z' | head -c1`
+model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
+
+if [ "$model_hardware" == "TL-WR940N_v6" ];then
+	uci set meshdesk.settings.id_if="eth0"
+	uci commit meshdesk
+elif [ "$model_hardware" == "CF-E320N_v2" ];then
+	uci set meshdesk.settings.id_if="eth1"
+	uci commit meshdesk
+elif [ "$model_hardware" == "CF-E355AC_v2" ];then
+	uci set meshdesk.settings.hardware="e355ac"
+	uci set meshdesk.settings.id_if="eth1"
+	uci commit meshdesk
+fi	

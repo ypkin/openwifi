@@ -1,0 +1,29 @@
+FILTER: injection
+###########vnexpress.net####################
+###--->giaitri.vnexpress.net
+s†<div class="box_category width_common" id="hot_anh-video">\s*?\
+†<div id="wifimedia_background" style="opacity: 1; position: relative; z-index: 2; background: transparent none repeat scroll 0% 0%; overflow: hidden; width: 100%; display: block; visibility: visible; height: 100%;">\n\
+		<!--iframe id="advImg-w" src="https://tympanus.net/Tutorials/CSS3FullscreenSlideshow/" scrolling="no" style="display: block;" width="100%" height="100%" frameborder="no">\n\
+		\</iframe-->\n\
+		<a target="_blank" href="https://www.google.com.vn"><img style="margin:3px 1px 1px 3px;" border="0" width="100%" src="https://www.missviet.com.vn/wp-content/uploads/2017/01/sen2.jpg" height="100%">\</a>\n\
+\</div>\n\
+\<div class="box_category width_common" id="hot_anh-video">†
+
+#####-->giaitri.vnexpress.net-->thoi trang
+s†<div id="cate_lam-dep" class="box_category width_common">\s*?\
+†<div id="wifimedia_background" style="opacity: 1; position: relative; z-index: 2; background: transparent none repeat scroll 0% 0%; overflow: hidden; width: 100%; display: block; visibility: visible; height: 100%;">\n\
+		<!--iframe id="advImg-w" src="https://tympanus.net/Tutorials/CSS3FullscreenSlideshow/" scrolling="no" style="display: block;" width="100%" height="100%" frameborder="no">\n\
+		\</iframe-->\n\
+		<a target="_blank" href="https://www.google.com.vn"><img style="margin:3px 1px 1px 3px;" border="0" width="100%" src="https://www.missviet.com.vn/wp-content/uploads/2017/01/sen2.jpg" height="100%">\</a>\n\
+\</div>\n\
+\<div id="cate_lam-dep" class="box_category width_common">†
+
+
+#####-->giaitri.vnexpress.net-->lam dep
+s†<div id="cate_gioi-sao" class="box_category width_common">\s*?\
+†<div id="wifimedia_background" style="opacity: 1; position: relative; z-index: 2; background: transparent none repeat scroll 0% 0%; overflow: hidden; width: 100%; display: block; visibility: visible; height: 100%;">\n\
+		<iframe src="http://ad.wifimedia.vn/login/VKX17URneQ12:25:36" scrolling="no" style="display: block;" width="100%" height="100%" frameborder="no">\n\
+		\</iframe>\n\
+		<!--a target="_blank" href="https://www.google.com.vn"><img style="margin:3px 1px 1px 3px;" border="0" width="100%" src="https://www.missviet.com.vn/wp-content/uploads/2017/01/sen2.jpg" height="100%">\</a-->\n\
+\</div>\n\
+\<div id="cate_gioi-sao" class="box_category width_common">†

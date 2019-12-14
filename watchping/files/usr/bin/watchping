@@ -1,0 +1,99 @@
+#!/bin/sh 
+
+local interface="${1:?}"
+local timeout="${2:?}"
+local pinghosts="${3:?}"
+local pinginterval="${4:?}"
+
+run_hooks () {
+	reason="$1"
+	interface="$2"
+	last_hooks_run="$reason"
+	for hook in /etc/watchping/$interface-$reason.d/* ; do
+		[ -x "$hook" ] && $hook
+	done
+}
+
+watchping_ping() {
+	local interface="$1"; local timeout="$2"; local pinghosts="$3"; local pinginterval="$4"
+	local last_hooks_run="fail"
+	
+	if [ -r "/sys/class/net/$interface/ifindex" ] ; then
+		ifname="$interface"
+	else
+		ifname="$(uci -q get network.$interface.ifname)"
+		[ "${ifname% *}" != "$ifname" ] && ifname="br-$interface"
+		[ -r "/sys/class/net/$ifname/ifindex" ] || { echo "Interface $interface unsupported!" ; exit 1 ; }
+	fi	
+
+	time_now="$(cat /proc/uptime)"
+	time_now="${time_now%%.*}"
+	time_lastcheck="$time_now"
+	time_lastcheck_withinternet="$time_now"
+
+	while true ; do
+		# account for the time ping took to return. With a ping interval of 5s, ping might take more than that, so it is important to avoid even more delay.
+		time_now="$(cat /proc/uptime)"
+		time_now="${time_now%%.*}"
+		time_diff="$((time_now-time_lastcheck))"
+
+		[ "$time_diff" -lt "$pinginterval" ] && {
+			sleep_time="$((pinginterval-time_diff))"
+			sleep "$sleep_time"
+		}
+
+		time_now="$(cat /proc/uptime)"
+		time_now="${time_now%%.*}"
+		time_lastcheck="$time_now"
+		##Check process privoxy
+		#PID_ads=`pidof privoxy`
+		#if [ -f /etc/rc.d/S80privoxy ] && [ -z $PID_ads ] ; then
+		#	/etc/priv_ads.sh
+		#fi
+		##Check FastRoaming
+
+		##Check RSSI
+		rssi_on=$(uci -q get wifimedia.@advance[0].enable)
+		if [ $rssi_on == "1" ];then
+			level_defaults=-95
+			level=$(uci -q get wifimedia.@advance[0].level)
+			level=${level%dBm}
+			LOWER=${level:-$level_defaults}
+			#echo $LOWER	
+			dl_time=$(uci -q get wifimedia.@advance[0].delays)
+			dl_time=${dl_time%s}
+			ban_time=$(expr $dl_time \* 1000)
+			chmod a+x /tmp/denyclient
+			NEWLINE_IFS='
+'
+			OLD_IFS="$IFS"; IFS=$NEWLINE_IFS
+			signal=''
+			host=''
+			mac=''
+
+			for iface in `iw dev | grep Interface | awk '{print $2}'`; do
+				for line in `iw $iface station dump`; do
+					if echo "$line" | grep -q "Station"; then
+						if [ -f /etc/ethers ]; then
+							mac=$(echo $line | awk '{print $2}' FS=" ")
+							host=$(awk -v MAC=$mac 'tolower($1)==MAC {print $2}' FS=" " /etc/ethers)
+						fi
+					fi
+					if echo "$line" | grep -q "signal:"; then
+						signal=`echo "$line" | awk '{print $2}'`
+						#echo "$mac (on $iface) $signal $host"
+						if [ "$signal" -lt "$LOWER" ]; then
+							  #echo $MAC IS $SNR - LOWER THAN $LOWER DEAUTH THEM
+							  echo "ubus call hostapd.$iface "del_client" '{\"addr\":\"$mac\", \"reason\": 1, \"deauth\": True, \"ban_time\": $ban_time}'" >>/tmp/denyclient
+						fi
+
+					fi
+				done
+			done
+			IFS="$OLD_IFS"
+		/tmp/denyclient
+		echo "#!/bin/sh" >/tmp/denyclient
+		fi #END RSSI
+	done
+}
+watchping_ping "$interface" "$timeout" "$pinghosts" "$pinginterval"

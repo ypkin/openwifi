@@ -1,0 +1,37 @@
+#!/bin/sh
+
+local FUNC=$1
+
+log() {
+	logger -t "btnaction" "$@"
+}
+
+reset_short() {
+	passwd -d admin
+	reboot -f
+}
+
+reset_long() {
+	mtd -r erase rootfs_data
+}
+
+qss_short() {
+	log "Short QSS Button"
+}
+
+qss_long() {
+	log "Long QSS Button"
+}
+
+if [ $FUNC = "reset_short" ]; then
+	reset_short
+fi
+if [ $FUNC = "reset_long" ]; then
+	reset_long
+fi
+if [ $FUNC = "qss_short" ]; then
+	qss_short
+fi
+if [ $FUNC = "qss_long" ]; then
+	qss_long
+fi

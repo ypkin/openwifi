@@ -1,0 +1,31 @@
+#!/bin/sh
+
+uci -q get wifimedia.@hotspot[0] || {
+        uci batch <<EOF
+        add wifimedia hotspot
+        set wifimedia.@hotspot[0].iphone=0
+        set wifimedia.@hotspot[0].facebook=1
+        set wifimedia.@hotspot[0].google=0
+        set wifimedia.@hotspot[0].windowsphone=1
+        set wifimedia.@hotspot[0].network=10.5.50.0
+        set wifimedia.@hotspot[0].netmask=255.255.255.0
+        set wifimedia.@hotspot[0].uamlisten=10.5.50.1
+        set wifimedia.@hotspot[0].dns1=8.8.8.8
+        set wifimedia.@hotspot[0].dns2=8.8.4.4
+        set wifimedia.@hotspot[0].wan=br-wan
+        set wifimedia.@hotspot[0].lan=wlan0
+        set wifimedia.@hotspot[0].radsecret=123456
+		set wifimedia.@hotspot[0].uamformat="ad.wifimedia.vn"	
+        set wifimedia.@hotspot[0].uamsecret="7ui5mRlxMs15:20:40"
+		set wifimedia.@hotspot[0].nasid="wifimedia"
+        commit wifimedia
+EOF
+}
+/etc/init.d/update_ip disable
+/etc/init.d/wifi_portal stop
+/etc/init.d/wifi_portal disable
+rm -f /etc/hotplug.d/iface/30-chilli
+echo "" >/etc/config/hs_ips
+echo "" >/etc/config/hs_wgd
+
+cat /sbin/wifimedia/defaults >/etc/chilli/defaults

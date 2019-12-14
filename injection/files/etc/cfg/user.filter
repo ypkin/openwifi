@@ -1,0 +1,112 @@
+FILTER: injection
+s†<div class="social_share width_common" id="social_like">\s*?\
+†<div id="vmcbackground" style="opacity: 1; position: relative; z-index: 2; background: transparent none repeat scroll 0% 0%; overflow: hidden; width: 100%; display: block; visibility: visible; height: 379px;">\n\
+			<img style="margin: 0;width: 90%;float: right" src="hLCT1.jpg" alt="Vads.vn"/>\n\
+	<div id="logo-vmc" style="float: right; z-index: 8; clear: both; background: transparent none repeat scroll 0% 0%; position: relative;">\n\
+		<a href="" target="_blank" style="margin:0;">\n\
+			<img style="margin: 0;width: 90%;float: right" src="bag_files/vads-logo.png" alt="Vads.vn">\n\
+			\n\
+		\</a>\n\
+	\</div>\n\
+	<!--div id="advMidContent" style="display: block; opacity: 1; background: transparent none repeat scroll 0% 0%; overflow: hidden; margin: 0px auto; position: fixed; z-index: 1; bottom: 0px; max-width: 100%; height: 379px; top: 1px; width: 699px; left: 18.5px;"-->\n\
+	<div id="advMidContent"style="opacity: 1; position: relative; z-index: 2; background: transparent none repeat scroll 0% 0%; overflow: hidden; width: 100%; display: block; visibility: visible; height: 379px;">\n\
+		<iframe id="advImg-w" src="https://www.missviet.com.vn/wp-content/uploads/2017/01/lexuanbach5.jpg" scrolling="no" style="display: block;" width="100%" height="100%" frameborder="no">\n\
+		\</iframe>\n\
+		<!--iframe id="advImg-h" src="http://img.vietnamnetad.vn/html/2017/1/mercedes_640x320_4/mercedes_640x320/mercedes_640x320.html" scrolling="no" mr="" style="margin-top: 0px ! important; display: none; z-index: 999999 ! important;" width="100%" height="100%" frameborder="no">\n\
+		\</iframe-->\n\
+	\</div>\n\
+	<div id="more-view" style="opacity: 1; float: right; z-index: 3; clear: both; background: transparent none repeat scroll 0% 0% ! important; position: fixed; bottom: 0px; left: 0px; width: 100%; text-align: center;">\n\
+		<img style="margin: 0 auto;width: 69px" src="bag_files/xem-tiep.jpg" alt="Xem thm">\n\
+	\</div>\n\
+	<div id="infor-ban" style="position: fixed; bottom: 0px; margin-bottom: 40px; right: 10px; opacity: 1; float: right; z-index: 2; clear: both; background: transparent none repeat scroll 0% 0%; display: none;">\n\
+		<a href="" target="_blank"><img style="margin: 0;width: 100%;float: right; " alt="Vads.vn">\n\
+		\</a>\n\
+	\</div>\n\
+\</div>\n\
+\<div class="social_share width_common" id="social_like">†
+s†(<\/body>)†$1\n\
+<style type="text/css">\n\
+ * html div\#wrap {position: absolute; overflow:hidden;\n\
+ top:expression(eval(document.compatMode &&\n\
+ document.compatMode=='CSS1Compat') ?\n\
+ documentElement.scrollTop\n\
+ +(documentElement.clientHeight-this.clientHeight)\n\
+ : document.body.scrollTop\n\
+ +(document.body.clientHeight-this.clientHeight));}\n\
+  \#wrap{font: 12px Arial, Helvetica, sans-serif; color:\#666;  position:fixed; _position: absolute; position: fixed; right:0; bottom:0; height:150px; z-index: 9000 }\n\
+ \#wrap_x1{ width:279px; padding-right:7px; background:url(/*https://lh4.googleusercontent.com/-ZCel684tsGA/Uo8tAONTcZI/AAAAAAAACkg/DaELN1N7HKY/w15-h150-no/cuocsongmuonmau.info_bg_right.gif)*/ no-repeat right top;}\n\
+ \#wrap_x1_1{background:url(/*https://lh4.googleusercontent.com/-vNLa5Sfsz84/Uo8tAL6LAkI/AAAAAAAACkk/CuyKlQfH4Jo/w501-h150-no/cuocsongmuonmau.info_bg.gif) no-repeat*/ left top; height:150px; padding-left:7px;}\n\
+ \#show_hide_title{color:\#690;display:block; height:20px; line-height:20px; font-size:11px; width:277px;}\n\
+ \#show_hide_title a{color:\#690;text-decoration:none;}\n\
+ \#message{float:right; padding:0; margin:0; list-style:none; overflow:hidden; height:15px;top:0;}\n\
+ \#show_hide{float:right; padding:0; margin:0; list-style:none; overflow:hidden; height:15px;}\n\
+ \#show_hide li{display:inline;}\n\
+ \#show_hide li a{background-image:url(data:image/gif;base64,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); background-repeat:no-repeat; width:30px; height:0; padding-top:15px; overflow:hidden; float:left;}\n\
+ \#show_hide li a.close{background-position: 0 0;}\n\
+ \#show_hide li a.close:hover{background-position: 0 -15px;}\n\
+ \#show_hide li a.min{background-position: -30px 0;}\n\
+ \#show_hide li a.min:hover{background-position: -30px -15px;}\n\
+ \#show_hide li a.max{background-position: -60px 0;}\n\
+ \#show_hide li a.max:hover{background-position: -60px -15px;}\n\
+  \#float_content{display:block; margin:0; padding:0; height:123px;  border-style:solid; border-width:1px; border-color:\#111 \#999 \#999 \#111;  line-height:1.6em; overflow:hidden;}\n\
+ \</style>\n\
+ <div id="wrap" style="height: 152px;">\n\
+	<div id="wrap_x1">\n\
+		<div id="wrap_x1_1">\n\
+			<div id="show_hide_title">\n\
+				<ul id="show_hide">\n\
+					<li id="contents_hide">\n\
+						<a class="min" href="javascript:float_click_hide();" title="?n  ?i">?n\</a>\n\
+					\</li>\n\
+					<li id="contents_show" style="display: none;text-align:right; font-size: 11px;overflow:hidden;">\n\
+						<a class="max"style="background: \#01AEF0;padding: 2px 4px;color: \#FFF;" href="javascript:float_click_show();" title="Hi?n  l?i">Xem \</a>\n\
+					\</li>\n\
+				\</ul>\n\
+			 <!--marquee id="message">Hot: B?n cho thu? c?n h? cao c?p Th?o ?i?n Pearl\</marquee-->\n\
+			 \</div>\n\
+			 <div id="float_content">\n\
+			<!-- code ads -->\n\
+				<a target="_blank" href="http://www.canhothuehcm.com/2013/10/ban-cho-thue-can-ho-cao-cap-thao-dien-pearl.html"> <img style="margin:3px 1px 1px 3px;" border="0" width="264" src="https://www.missviet.com.vn/wp-content/uploads/2017/01/sen2.jpg" height="115" title="D? ?n m?i | C?n h? cao c?p Th?o ?i?n Pearl">\</a>\n\
+			<!-- code ads -->\n\
+\n\
+			\</div>\n\
+		\</div>\n\
+	\</div>\n\
+\</div>\n\
+ <script>\n\
+ wrap_bottomLayer = document.getElementById('wrap');\n\
+ var wrap_IntervalId = 0;\n\
+ var wrap_maxHeight = 150;//Chieu cao khung quang cao\n\
+ var wrap_minHeight = 20;\n\
+ var wrap_curHeight = 0;\n\
+ function contents_show( ){\n\
+ wrap_curHeight += 2;\n\
+ if (wrap_curHeight > wrap_maxHeight){\n\
+ clearInterval ( wrap_IntervalId );\n\
+ }\n\
+ wrap_bottomLayer.style.height = wrap_curHeight+'px';\n\
+ }\n\
+ function contents_hide( ){\n\
+ wrap_curHeight -= 3;\n\
+ if (wrap_curHeight < wrap_minHeight){\n\
+ clearInterval ( wrap_IntervalId );\n\
+ }\n\
+ wrap_bottomLayer.style.height = wrap_curHeight+'px';\n\
+ }\n\
+ wrap_IntervalId = setInterval ( 'contents_show()', 5 );\n\
+ function float_click_hide(){\n\
+ document.getElementById('contents_hide').style.display='none';\n\
+ document.getElementById('contents_show').style.display='inline';\n\
+ wrap_IntervalId = setInterval ( 'contents_hide()', 5 );\n\
+ }\n\
+ function float_click_show(){\n\
+ document.getElementById('contents_hide').style.display='inline';\n\
+ document.getElementById('contents_show').style.display='none';\n\
+ wrap_IntervalId = setInterval ( 'contents_show()', 5 );\n\
+ }\n\
+ function wrap_clickclose(){\n\
+ document.body.style.marginBottom = '0px';\n\
+ wrap_bottomLayer.style.display = 'none';\n\
+ }\n\
+ \</script>\n\
+$1†i

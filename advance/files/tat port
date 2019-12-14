@@ -1,0 +1,28 @@
+find_mac_gateway="/root/b"
+cat $find_mac_gateway
+gateway_wr84x=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
+cat "$find_mac_gateway" | while read line ; do
+	if [ "$(echo $line | grep $gateway_wr84x)" ] && [ "$(echo $line | grep $DISABLE_PORT)" ] ;then
+			for i in 1 2 3 4 5; do
+				#swconfig dev switch0 port $i set disable 1
+				echo $i
+			done	
+	fi
+done	
+
+
+
+
+find_mac_gateway="/root/b"
+cat $find_mac_gateway
+gateway_wr84x=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
+cat "$find_mac_gateway" | while read line ; do
+	if [ "$(echo $line | grep gateway_wr84x)" ] ;then
+		if [ "(echo $line | awk '{print $2}')" == "DISABLE_PORT"  ];then
+			for i in 1 2 3; do
+				swconfig dev switch0 port $i set disable 1
+			done
+			swconfig dev switch0 set apply
+		fi	
+	fi
+done	

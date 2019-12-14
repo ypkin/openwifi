@@ -1,0 +1,11 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=15
+
+EXTRA_COMMANDS="status"
+EXTRA_HELP="        status  View the status ..."
+
+boot() {
+    /sbin/wifimedia/update_ip.sh
+}

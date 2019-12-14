@@ -1,0 +1,35 @@
+Token 91987737
+system.hostname wifimedia
+system.reboot 1
+system.admin.passwd 12345
+wifimedia.sync.time 11
+network.wan.ipaddr 192.168.1.2
+network.wan.netmask 255.255.255.0
+network.wan.proto static/dhcp
+network.wan.type bridge
+network.lan.ipaddr  172.16.99.1
+network.lan.netmask  255.255.255.0
+network.lan.proto  static/dhcp
+network.lan.type  bridge
+dhcp.lan.start 99
+dhcp.lan.limit 100
+dhcp.lan.leasetime 1h
+scheduled enable
+scheduled.time.hour 5
+scheduled.time.minute 00
+wireless.radio.enable enable
+wireless.essid.hide 0
+wireless.essid.ssid PDA
+wireless.essid.key 11111111
+wireless.essid.isolate 0
+wireless.essid.network lan/wan
+wireless.essid.mode ap
+wireless.essid.channel 9
+wireless.essid.country TW
+wireless.essid.maxassoc 30
+wireless.essid.nasid wifimediaxxx
+wireless.essid.fastroaming ieee80211r/ieee80211i
+ap.upgade
+ap.reset
+
+

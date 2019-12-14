@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>wifimedia URL Info</ShortName>
+  <Description>
+ 
+  </Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Developer>widimedia Team</Developer>
+  <Contact></Contact>
+  <Image width="16" height="16" type="image/x-icon"></Image>
+  <Url type="text/html" method="GET" template="@default-cgi@show-url-info?url={searchTerms}"/>
+</OpenSearchDescription>
