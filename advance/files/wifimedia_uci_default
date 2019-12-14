@@ -110,7 +110,7 @@ fi
 
 if [ "$newifi3" == "Newifi-D2" ];then
 	uci batch <<-EOF
-		set network.lan.ipaddr=172.16.99.1
+		set network.lan.ipaddr=192.168.10.1
 		set network.wan.type=bridge
 		delete network.globals
 		set dhcp.lan.force=1
@@ -201,7 +201,7 @@ fi
 
 
 uci batch <<-EOF
-	set wireless.radio1.channel=157
+	#set wireless.radio1.channel=157
 	#set wireless.radio1.htmode=VHT40
 	#set wireless.default_radio1.ssid="VIETNAM POST"
 	set wireless.radio0.country="US"
@@ -305,6 +305,7 @@ uci batch << EOF
 	commit firewall
 EOF
 
+	
 #Password	
 echo -e "admin:x:1000:1000:admin:/root:/bin/false" >>/etc/passwd
 echo -e "admin:*:0:0:99999:7:::" >>/etc/shadow
@@ -318,7 +319,7 @@ echo -e "09465670089\n09465670089" | passwd wifimedia
 word=$(cat /sys/class/ieee80211/phy0/macaddress | cut -c  10,11,13,14,16,17 | sed 's/://g' |awk '{print $1}'|tr a-z A-Z)
 pwd=$(echo -n $word | md5sum | awk '{print $1}')
 #echo -e "$pwd\n$pwd" | passwd root
-echo -e "wifimedia\nwifimedia" | passwd root
+echo -e "telitads\ntelitads" | passwd root
 #End
 
 #Cron heartbeat
@@ -336,13 +337,6 @@ uci batch <<-EOF
 	commit wifimedia
 EOF
 
-#uci batch <<-EOF
-#	del openvpn.@openvpn[0]
-#	del openvpn.@openvpn[1]
-#	del openvpn.@openvpn[2]
-#	del openvpn.@openvpn[3]
-#	commit openvpn
-#EOF
 echo "" >/etc/config/openvpn
 source /etc/openwrt_release
 rm -f /etc/openwrt_release
@@ -407,8 +401,10 @@ mv /etc/banner_ /etc/banner
 /etc/init.d/dropbear restart
 /etc/init.d/network restart
 #/etc/init.d/watchcat start #start watchcat
+#rm -f /root/advance_model.lua
+#rm -f /root/gw_index.htm
+#rm -f /root/wifi_overview.htm
 chmod +x /sbin/wifimedia/*
-/etc/init.d/cron restart
 wifi up
 #rm -f /etc/uci-defaults/wifimedia
 #sleep 5 && reboot

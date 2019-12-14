@@ -1,32 +1,12 @@
 #!/bin/sh /etc/rc.common
 
-START=99
+START=3
 STOP=15
 
-EXTRA_COMMANDS="status"
-EXTRA_HELP="        status  checking"
 lcs=/etc/opt/wfm_lcs
-model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
-#val1=$(ifconfig eth1 | grep 'HW' | awk '{print $5}' | cut -c 13,14,15,16,17)
-#macaddr="80:A9:EF:63:"$val1
-#echo ${macaddr}
-#echo $macaddr > /sys/class/ieee80211/phy0/macaddress
-#dnsctl=$(uci -q get meshdesk.internet1.dns)
-#ip=`nslookup $dnsctl | grep 'Address' | grep -v '127.0.0.1' | grep -v '8.8.8.8' | grep -v '0.0.0.0'|grep -v '::' | awk '{print $3}'`
-#if [ "$ip" != "" ] &&  [ -e /etc/config/meshdesk ];then
-#	uci set meshdesk.internet1.ip=$ip
-#	uci commit meshdesk
-#fi
-	
-#echo $ip
+
 boot() {
-	if [ -e "$lcs" ];then
-			/sbin/wifimedia/controller.sh license_srv >/dev/null 2>&1
-	fi
-	
-	wifi up
-	sleep 5
-	# Wait for network up & running
+
 	while true; do
     	ping -c1 -W1 8.8.8.8
     	if [ ${?} -eq 0 ]; then
@@ -35,6 +15,7 @@ boot() {
         	sleep 1
     	fi
 	done
-	/sbin/wifimedia/controller.sh checking
-	/sbin/wifimedia/controller.sh action_lan_wlan
+	#if [ -e "$lcs" ];then
+	/sbin/wifimedia/controller.sh license_srv >/dev/null 2>&1
+	#fi
 }

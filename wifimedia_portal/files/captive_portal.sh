@@ -8,7 +8,7 @@ PREAUTHENTICATED_RULES=/tmp/preauthenticated_rules
 NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
 walledgadent=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users | sed 's/,/ /g'`
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
-domain_default=${domain:-portal.nextify.vn/splash}
+domain_default=${domain:-tplink-dev.telitads.vn}
 #redirecturl=`uci -q get wifimedia.@nodogsplash[0].redirecturl`
 #redirecturl_default=${redirecturl:-https://google.com.vn}
 preauthenticated_users=`uci -q get wifimedia.@nodogsplash[0].preauthenticated_users` #Walled Gardent
@@ -40,7 +40,7 @@ config_captive_portal() {
 
 		#uci set nodogsplash.@nodogsplash[0].enabled='1'
 		uci set nodogsplash.@nodogsplash[0].gatewayinterface="${NET_ID}";
-		uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
+		#uci set nodogsplash.@nodogsplash[0].gatewayname="CPN";
 		#uci set nodogsplash.@nodogsplash[0].redirecturl="$redirecturl_default";
 		uci set nodogsplash.@nodogsplash[0].maxclients="$maxclients_default";
 		uci set nodogsplash.@nodogsplash[0].preauthidletimeout="$preauthidletimeout_default";
@@ -49,7 +49,7 @@ config_captive_portal() {
 		uci set nodogsplash.@nodogsplash[0].sessiontimeout="$sessiontimeout_default";
 		uci set nodogsplash.@nodogsplash[0].checkinterval="$ctv";
 		# Whitelist IP
-		for i in portal.nextify.vn static.nextify.vn nextify.vn crm.nextify.vn googletagmanager.com $domain $walledgadent; do
+		for i in googletagmanager.com telitads.vn $domain $walledgadent; do
 			nslookup ${i} 8.8.8.8 2> /dev/null | \
 				grep 'Address ' | \
 				grep -v '127\.0\.0\.1' | \
@@ -76,6 +76,7 @@ config_captive_portal() {
 		uci del nodogsplash.@nodogsplash[0].preauthenticated_users
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
 		uci commit
+
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw"
 		if network_get_ipaddr addr "wan"; then
@@ -97,6 +98,7 @@ config_captive_portal() {
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow tcp port 53"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow udp port 53"	
 
+		
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 22"
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow tcp port 53"
 		uci add_list nodogsplash.@nodogsplash[0].users_to_router="allow udp port 53"
@@ -136,22 +138,20 @@ captive_portal_restart(){
 	fi
 }
 
-heartbeat(){
-	ndsctl status > /tmp/ndsctl_status.txt
-	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
-	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
-	NUM_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Client authentications since start' | cut -d':' -f2 | xargs)
-	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	TOTAL_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Current clients' | cut -d':' -f2 | xargs)
-	TOTAL_CLIENTS=$(ndsctl status | grep clients | awk '{print $3}')
+heartbeat_cpn(){
+	#ndsctl status > /tmp/ndsctl_status.txt
+	#MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+	#UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
+	#NUM_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Client authentications since start' | cut -d':' -f2 | xargs)
+	#RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
+	#TOTAL_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Current clients' | cut -d':' -f2 | xargs)
+	#TOTAL_CLIENTS=$(ndsctl status | grep clients | awk '{print $3}')
 	#Value Jsion
 	#wget -q --timeout=3 \
-	#	 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
-	#	 -O /dev/null
+	#	 "$heartbeat_url=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}&total_clients=${TOTAL_CLIENTS}" \
+	#	 -O /tmp/config_setting
+	#get_config	 
 	captive_portal_restart
-	wget -q --timeout=3 \
-	"http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}&total_clients=${TOTAL_CLIENTS}" \
-	 -O /dev/null
 }
 
 get_captive_portal_clients() {
@@ -196,6 +196,18 @@ get_captive_portal_clients() {
 	#wget --post-data="clients=${clients_ndsclt}&gateway_mac=${global_device}" http://api.nextify.vn/clients_around 2>/dev/null
     #rm /tmp/captive_portal_clients	
  }
+ 
+get_config(){
+	if [ "$md5ndsconfig" != "$checkmd5file" ];then
+		echo "new config .........."
+		
+		uci set wifimedia.@nodogsplash[0].md5sum=$checkmd5file
+		uci commit wifimedia
+		setting_config
+	else
+		echo "maintain the existing settings "
+	fi
+}
 
 write_login(){
 
@@ -248,7 +260,7 @@ dhcp_extension(){
 			uci set wireless.default_radio0.network='hotspot'
 			uci set wireless.default_radio1.network='hotspot'
 		else
-			uci set network.local.ipaddr='172.16.99.1'
+			uci set network.local.ipaddr='192.168.10.1'
 			uci add_list network.local.network='lan'
 			uci set dhcp.lan.ignore='1'
 			uci set wireless.default_radio0.network='lan'
@@ -270,10 +282,13 @@ dhcp_extension(){
 	fi
 	uci commit && wifi up
 }
+
 cpn_detect(){
-	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpnurl`
+	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn`
 	if [ $cpn_status -eq 0 ];then
 		echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
+	else
+		crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
 	fi
 }
 "$@"

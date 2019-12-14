@@ -69,7 +69,7 @@ watchcat_ping() {
 				logger -p daemon.info -t "watchcat[$$]" "no internet connectivity for $time_diff seconds. Reseting when reaching $period"
 			fi
 		done
-		/sbin/wifimedia/controller.sh get_client_connect_wlan
+		/sbin/wifimedia/controller.sh rssi
 		#time_diff="$((time_now-time_lastcheck_withinternet))"
 		#[ "$time_diff" -ge "$period" ] && shutdown_now "$forcedelay"
 
