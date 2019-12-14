@@ -31,4 +31,3 @@ echo -n $A4$A2$A5$A1$A3 | md5sum | awk '{print $1}' | tr a-z A-Z >/etc/opt/licen
 #echo -n $A1$A2$A3$A4$A5 | md5sum | awk '{print $1}' | tr a-z A-Z >/etc/opt/license/ads
 #EN OPTION LICENSE
 touch /etc/opt/wfm_lcs
-/etc/init.d/upwifi disable
