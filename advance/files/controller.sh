@@ -291,8 +291,9 @@ if [ "${curl_result}" -eq 0 ]; then
 				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
 				cat /etc/opt/license/wifimedia >/etc/opt/license/status
-				echo "" > /etc/crontabs/wificode
+				rm /etc/crontabs/wificode
 				/etc/init.d/wifimedia_check disabled
+				rm /etc/init.d/wifimedia_check
 				license_local
 			else
 				echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
