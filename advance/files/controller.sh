@@ -298,6 +298,7 @@ if [ "${curl_result}" -eq 0 ]; then
 				uci commit wifimedia
 				cat /etc/opt/license/wifimedia >/etc/opt/license/status
 				echo "" > /etc/crontabs/wificode
+				/etc/init.d/wifimedia_check disabled
 				license_local
 			else
 				echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
