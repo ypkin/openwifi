@@ -4,6 +4,9 @@
 
 gateway=$(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }')
 #Variables local_config
+ch=`uci -q get wifimedia.@advance[0].channel` 
+macs=`uci -q get wifimedia.@advance[0].macs | sed 's/-/:/g' | sed 's/,/ /g' | xargs -n1`
+list_ap="/tmp/list_eap"
 
 #------------License srv checking-----------------
 licensekey=/tmp/upgrade/licensekey
@@ -15,12 +18,16 @@ device=$(cat /sys/class/ieee80211/phy0/macaddress | sed 's/:/-/g' | tr a-z A-Z)
 apid=$(echo $device | sed 's/:/-/g')
 
 gateway_wr84x=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
+find_mac_gateway="/tmp/mac_gateway"
+#cf_device=`ifconfig eth1 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
+#cf_apid=$(echo $cf_device | sed 's/:/-/g')
+
+wr940_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
+#wr940_apid=$(echo $cf_device | sed 's/:/-/g')
 global_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'`
 #--------------RSSI------------------------------
 rssi_on=$(uci -q get wifimedia.@advance[0].enable)
 #------------------------------------------------
-#eap_manager
-eap_device="/www/luci-static/resources/devices.txt"
 #---------------controller online----------------
 hardware=/tmp/upgrade/hardware
 url_srv="http://firmware.wifimedia.com.vn/hardware"

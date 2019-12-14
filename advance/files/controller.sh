@@ -4,35 +4,9 @@
 
 . /sbin/wifimedia/variables.sh
 
-ip_dhcp=$(ifconfig br-wan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
-ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
-ip_gateway=$(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }')
-
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
 	#echo $PUBLIC_IP
-}
-wr840v4() { #checking internet
-
-	#check gateway
-	ping -c 3 "$gateway" > /dev/null
-	if [ $? -eq "0" ];then
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wps/
-		echo timer > trigger
-	else
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wps/
-		echo none > trigger
-	fi
-
-	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
-	if [ $? -eq "0" ];then
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wan/
-		echo timer > trigger
-	else
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr840n-v4:*:wan/
-		echo none > trigger
-	fi
 }
 
 wr840v620() { #checking internet
@@ -86,29 +60,6 @@ wr841v14() { #checking internet
 	fi	
 }
 
-wr840v13() { #checking internet
-
-	#check gateway
-	ping -c 3 "$gateway" > /dev/null
-	if [ $? -eq "0" ];then
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wps/
-		echo timer > trigger
-	else
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wps/
-		echo none > trigger
-	fi
-	
-	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
-	if [ $? -eq "0" ];then
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wan/
-		echo timer > trigger
-	else
-		cd /sys/devices/platform/gpio-leds/leds/tl-wr841n-v13:*:wan/
-		echo none > trigger
-	fi
-}
-
 checking (){
 	model=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
 
@@ -127,7 +78,6 @@ checking (){
 	#pidhostapd=`pidof hostapd`
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
-
 
 license_srv() {
 
@@ -225,15 +175,15 @@ fi
 }
 
 monitor_port(){
-rm /tmp/monitor_port #Clear data
 swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' | while read line;do
 	echo "$line," >>/tmp/monitor_port
 done
 ports_data==$(cat /tmp/monitor_port | xargs| sed 's/,/;/g')
 echo $ports_data
-#wget --post-data="gateway_mac=${global_device}&ports_data=${ports_data}" $link_post -O /dev/null
+wget --post-data="gateway_mac=${global_device}&ports_data=${ports_data}" $link_post -O /dev/null
+rm /tmp/monitor_port
 }
- 
+
 rssi() {
 if [ $rssi_on == "1" ];then
 	level_defaults=-80

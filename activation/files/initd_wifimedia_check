@@ -3,9 +3,12 @@
 START=99
 STOP=15
 
+EXTRA_COMMANDS="status"
+EXTRA_HELP="        status  checking"
 lcs=/etc/opt/wfm_lcs
-boot() {
+boot() {	
 	if [ -e "$lcs" ];then
 		/sbin/wifimedia/controller.sh license_srv >/dev/null 2>&1
-	fi	
+	fi
+
 }

@@ -7,9 +7,8 @@ echo -e "wificode:*:0:0:99999:7:::" >>/etc/shadow
 temp_dir="/tmp/crontabs"
 if [ ! -d "$temp_dir" ]; then
 	mkdir $temp_dir
-	echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" >$temp_dir/wificode
 fi
-	
+echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > $temp_dir/wificode
 echo "Wrong License Code & auto reboot" >/etc/opt/license/status
 crontab $temp_dir/wificode -u wificode
 /etc/init.d/cron restart

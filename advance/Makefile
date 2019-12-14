@@ -69,8 +69,8 @@ define Package/advance/install
 	$(INSTALL_DATA) ./files/advance_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/advance.lua
 	#$(INSTALL_DATA) ./files/index.htm $(1)/usr/lib/lua/luci/view/wifimedia_view/index.htm
 	
-	$(INSTALL_DATA) ./files/switchmode_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/switchmode.lua
-	$(INSTALL_DATA) ./files/switchmode_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/switchmode.lua
+	#$(INSTALL_DATA) ./files/bridge_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/bridge.lua
+	#$(INSTALL_DATA) ./files/bridge_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/bridge.lua
 endef
 
 define Package/advance/conffiles
