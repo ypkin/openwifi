@@ -34,17 +34,17 @@ device_cfg(){
 	monitor_port
 	get_client_connect_wlan
 	#get_client_connect_wlan $cpn_url
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${number_client}&ip_opvn=${ip_opvn}" "$link_config""$global_device" -O /tmp/device_cfg
-	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
-		start_cfg
-	fi
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${number_client}&ip_opvn=${ip_opvn}" "http://monitor.wifimedia.vn/api/monitoring/$global_device" -O /tmp/device_cfg
+	#if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
+	#	start_cfg
+	#fi
 	uci set wifimedia.@hash256[0].value=$hash256
 	#echo "Token "$token
 	#echo "AP MAC "$global_device
 	#echo "mac_clients "$client_connect_wlan
 	#echo "ports_data "$ports_data
-	rm /tmp/monitor_port
-	rm /tmp/client_connect_wlan
+	#rm /tmp/monitor_port
+	#rm /tmp/client_connect_wlan
 }
 token(){
 #token = sha256(mac+secret)

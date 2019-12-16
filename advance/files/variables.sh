@@ -26,7 +26,7 @@ response_file=/tmp/_cfg
 touch $response_file
 hash256=$(sha256sum $response_file | awk '{print $1}')
 device_fw=$(cat /sys/class/ieee80211/phy0/macaddress |sed 's/:/-/g' | tr a-z A-Z)
-link_config=`uci -q get wifimedia.@sync[0].server`
+link_config=`uci -q get wifimedia.@sync[0].server`  #http://monitor.wifimedia.vn/api/monitoring/a1-b2-c3-d9-dd-ef
 cpn_url=`uci -q get wifimedia.@nodogsplash[0].cpnurl`
 
 ip_wan=$(ifconfig br-wan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
