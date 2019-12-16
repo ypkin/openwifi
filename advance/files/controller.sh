@@ -336,7 +336,6 @@ get_client_connect_wlan(){
 	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;//g'| tr a-z A-Z)
 	number_client=$(cat /tmp/client_connect_wlan | wc -l)
 	#monitor_port
-	#wget --post-data="&access_point_macs=${global_device}&mac_clients=${client_connect_wlan}&clients=${clients}" $cpn_url -O /dev/null #https://api.telitads.vn/v1/access_points/state
 	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
 	echo $client_connect_wlan
 	rm /tmp/client_connect_wlan
@@ -370,12 +369,6 @@ license_srv() {
 					uci commit wifimedia
 					cat /etc/opt/license/wifimedia >/etc/opt/license/status
 					license_local
-				else
-					#echo "we will maintain the existing settings."
-					#echo "Wrong License Code & auto reboot" >/etc/opt/license/status
-					#enable cronjob chek key
-					echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
-					#/etc/init.d/cron restart
 				fi
 			done	
 		fi
