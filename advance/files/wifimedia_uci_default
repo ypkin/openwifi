@@ -112,71 +112,13 @@ if [ "$model_hardware" == "TL-WR840N_v4" ];then
 	echo "TL-WR840N v4" >/etc/hardware
 elif [ "$model_hardware" == "TL-WR741ND_v4" ];then
 	echo "TL-WR740N v4" >/etc/hardware		
-elif [ "$model_hardware" == "TL-WA901ND_v3" ];then
-	echo "TL-WA901ND v3" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR841N_v13" ];then
-	echo "TL-WR841N v13" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR940N_v4" ];then
-	echo "TL-WR940N v5" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR940N_v6" ];then
-	echo "TL-WR940N v6.1" >/etc/hardware
-elif [ "$model_hardware" == "TL-WR941N/ND_v6" ];then
-	echo "TL-WR940N v3" >/etc/hardware
 elif [ "$model_hardware" == "TL-WR840N_v5" ];then
 	echo "TL-WR840N v5" >/etc/hardware
 elif [ "$model_hardware" == "TL-WR841N_v14" ];then
 	echo "TL-WR841N v14" >/etc/hardware
 elif [ "$model_hardware" == "TL-WR840N_v6" ];then
 	echo "TL-WR840N v6" >/etc/hardware	
-elif [ "$model_hardware" == "AC51U" ];then
-	echo "AC700" >/etc/hardware	
-elif [ "$model_hardware" == "CF-E355AC_v2" ];then
-	echo "EAP35AC v2" >/etc/hardware
-	uci set meshdesk.settings.id_if="eth1"
-	uci commit meshdesk
-elif [ "$model_hardware" == "CF-E320N_v2" ];then
-	echo "EAP320v2" >/etc/hardware
-	uci set meshdesk.settings.id_if="eth1"
-	uci commit meshdesk
 fi
-
-#Add vitual SSID
-#For abng
-#uci -q get wireless.@wifi-iface[1] || {
-#        uci batch <<EOF
-#        add wireless wifi-iface
-#        set wireless.@wifi-iface[1].device=radio0
-#        set wireless.@wifi-iface[1].mode=ap
-#        set wireless.@wifi-iface[1].network=lan
-#        set wireless.@wifi-iface[1].ssid=OPENWIFIx2
-#		set wireless.@wifi-iface[1].disabled=1
-#        commit wireless
-#EOF
-#}
-
-
-#uci batch <<-EOF
-#	set wireless.radio0.channel=157
-	#set wireless.@wifi-device[-1].channel=6
-	#set wireless.radio0.disabled=0
-	#set wireless.radio1.disabled=0
-#5G
-#	set wireless.default_radio0.ssid="OPENWIFI"
-#	set wireless.default_radio0.macaddr=60:A5:EF:63:E7:6D
-#	#set wireless.default_radio1.ssid="VIETNAM POST"
-#	#set wireless.default_radio1.maxassoc=30
-#	#set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
-#	add_list wireless.radio0.ht_capab="SHORT-GI-20"
-#	add_list wireless.radio0.ht_capab="SHORT-GI-40"
-#	add_list wireless.radio0.ht_capab="RX-STBC1"
-#	add_list wireless.radio0.ht_capab="DSSS_CCK-40"
-#	set wireless.radio0.country="CN"
-#	set wireless.radio0.txpower=20
-#	set wireless.radio0.htmode=VHT40
-#	set wireless.radio1.txpower=20
-#	commit wireless
-#EOF
-#enable wifi
 uci set wireless.radio0.disabled="0"
 uci commit wireless
 wifi
@@ -273,17 +215,12 @@ echo 'DISTRIB_CODENAME="'"$DISTRIB_CODENAME"'"' >> /etc/openwrt_release
 echo 'DISTRIB_TARGET="'"$DISTRIB_TARGET"'"' >> /etc/openwrt_release
 echo 'DISTRIB_DESCRIPTION="'"$DISTRIB_DESCRIPTION"'"' >> /etc/openwrt_release
 
-#rm -f /etc/privoxy/default.action
-#rm -f /etc/privoxy/default.filter
-
 #chmod a+x /sbin/wifimedia/*.sh
 /etc/init.d/system reload
 /etc/init.d/led reload
 
 ######Cron job
 echo "* * * * * /sbin/wifimedia/controller.sh checking" >>/etc/crontabs/root
-#echo "* * * * * /sbin/wifimedia/controller.sh remote_cfg" >>/etc/crontabs/root
-#echo "0 0 * * * /sbin/wifimedia/controller_srv.sh upgrade_srv" >>/etc/crontabs/root
 
 /etc/init.d/cron start
 /etc/init.d/cron enable
@@ -306,16 +243,6 @@ uci batch <<-EOF
 	commit system
 EOF
 /etc/init.d/sysntpd start >/dev/null
-##LED XIAOMI-MIWIFI
-#uci batch <<-EOF
-#	set system.led_power.name='power'
-#	set system.led_power.default='1'
-#	set system.led_power.trigger='netdev'
-#	set system.led_power.dev='br-wan'
-#	set system.led_power.mode='link tx rx'
-#	set system.led_power.sysfs='xiaomi:blue:status'
-#	commit system
-#EOF
 uci set luci.diag.dns="google.com.vn"
 uci set luci.diag.ping="google.com.vn"
 uci set luci.diag.route="google.com.vn"
@@ -331,11 +258,6 @@ mv /etc/banner_ /etc/banner
 /etc/init.d/dropbear restart
 /etc/init.d/network restart
 /etc/init.d/led reload
-#/etc/init.d/watchcat start #start watchcat
-rm -f /root/advance_model.lua
-rm -f /root/gw_index.htm
-rm -f /root/wifi_overview.htm
 chmod +x /sbin/wifimedia/*
 wifi up
-#rm -f /etc/uci-defaults/wifimedia
-#sleep 5 && reboot
+

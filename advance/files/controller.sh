@@ -227,17 +227,17 @@ cat $response_file | while read line ; do
 		if [ "$value" = "1" ];then
 			uci delete network.lan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth0 eth1.1"
+			uci set network.wan.ifname="eth0"
 			uci set wireless.@wifi-iface[0].network="wan"
 			uci set wifimedia.@switchmode[0].switch_port="$value"
 			uci commit
 		else
 			uci set network.lan="interface"
 			uci set network.lan.proto="static"
-			uci set network.lan.ipaddr="172.16.99.1"
+			uci set network.lan.ipaddr="192.168.5.1"
 			uci set network.lan.netmask="255.255.255.0"
 			uci set network.lan.type="bridge"
-			uci set network.lan.ifname="eth1.1"
+			uci set network.lan.ifname="eth0.1"
 			uci set dhcp.lan.force="1"
 			uci set dhcp.lan.netmask="255.255.255.0"
 			uci del dhcp.lan.dhcp_option
@@ -414,7 +414,6 @@ action_lan_wlan(){
 }
 
 license_srv() {
-	###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
 	echo "" > $licensekey
 	wget -q "${code_srv}" -O $licensekey
 	curl_result=$?
@@ -426,6 +425,7 @@ license_srv() {
 					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 					uci commit wifimedia
 					cat /etc/opt/license/wifimedia >/etc/opt/license/status
+					/etc/init.d/wifimedia_check disable
 					license_local
 				fi
 			done	

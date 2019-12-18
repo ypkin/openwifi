@@ -14,7 +14,7 @@ blacklist="http://firmware.wifimedia.com.vn/blacklist"
 device=$(cat /sys/class/ieee80211/phy0/macaddress | sed 's/:/-/g' | tr a-z A-Z)
 apid=$(echo $device | sed 's/:/-/g')
 
-gateway_wr84x=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
+_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }' | sed 's/:/-/g' | tr a-z A-Z`
 global_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'`
 #--------------RSSI------------------------------
 rssi_on=$(uci -q get wifimedia.@advance[0].enable)
