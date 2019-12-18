@@ -92,12 +92,13 @@ if [ "${curl_result}" -eq 0 ]; then
 				uci set wifimedia.@wireless[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
 				cat /etc/opt/license/wifimedia >/etc/opt/license/status
+				/etc/init.d/wifimedia_check disable
+				rm /etc/init.d/wifimedia_check
+				rm /etc/init.d/S99wifimedia_check
+				rm /etc/init.d/K15wifimedia_check
 				license_local
-			else
-					echo "enable check key"
-					echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
-					#/etc/init.d/cron restart
-					disable_3_port
+			#else
+					#disable_3_port
 			fi
 		done	
 	fi
