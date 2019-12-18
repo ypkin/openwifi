@@ -322,6 +322,14 @@ cat $response_file | while read line ; do
 		uci set scheduled.@times[0].hour="$value"
 	elif [  "$key" = "scheduletask.minute" ];then
 		uci set scheduled.@times[0].minute="$value"
+	#Cau hinh port TPLink840
+	elif [ "$key" = "device.ports" ];then
+		value=$(echo $value | sed 's/"//g')
+		for i in $value; do
+			#echo $i
+			swconfig dev switch0 port $i set disable 1
+		done
+		swconfig dev switch0 set apply
 	fi
 ##
 done	
