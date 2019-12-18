@@ -463,7 +463,6 @@ license_local() {
 	if [ "$uptime" -gt 15 ]; then #>15days
 		if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 			uci set wireless.radio0.disabled="0"
-			uci set wireless.radio1.disabled="0"
 			uci commit wireless
 			wifi
 			#touch $status
@@ -474,7 +473,6 @@ license_local() {
 		else
 			echo "Wrong License Code" >/etc/opt/license/status
 			uci set wireless.radio0.disabled="1"
-			uci set wireless.radio1.disabled="1"
 			uci commit wireless
 			wifi down
 		fi
@@ -538,7 +536,7 @@ wget -q "${blacklist}" -O $find_mac_gateway
 curl_result=$?
 if [ "${curl_result}" -eq 0 ]; then
 	cat "$find_mac_gateway" | while read line ; do
-		if [ "$(echo $line | grep $gateway_wr84x)" ] ;then
+		if [ "$(echo $line | grep $_device)" ] ;then
 			for i in 1 2 3 4; do
 				swconfig dev switch0 port $i set disable 1
 			done
@@ -548,23 +546,13 @@ if [ "${curl_result}" -eq 0 ]; then
 fi
 }
 
-monitor_port(){
-rm /tmp/monitor_port #Clear data
-swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' | while read line;do
-	echo "$line," >>/tmp/monitor_port
-done
-ports_data==$(cat /tmp/monitor_port | xargs| sed 's/,/;/g')
-echo $ports_data
-#wget --post-data="gateway_mac=${global_device}&ports_data=${ports_data}" $link_post -O /dev/null
-}
-
 
 heartbeat(){
 	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
 	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	wget -q --timeout=3 \
-		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
-		 -O /dev/null
+	#wget -q --timeout=3 \
+	#	 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
+	#	 -O /dev/null
 }
 "$@"
