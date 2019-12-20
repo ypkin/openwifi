@@ -120,12 +120,24 @@ if [ "$newifi3" == "Newifi-D2" ];then
 	EOF
 
 	uci batch <<-EOF
-		set wireless.default_radio0.maxassoc=30
-		set wireless.@wifi-iface[0].ssid=OPENWIFI
-		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
-		#set wireless.@wifi-iface[0].encryption="psk2"
-		#set wireless.@wifi-iface[0].key="123456A@$rnd"
-		set wireless.radio0.disabled=0
+	#5G
+		set wireless.radio1.channel=157
+		set wireless.radio1.htmode=VHT40
+		set wireless.default_radio1.ssid="WIFIMEDIA.VN"
+		set wireless.radio1.country="US"
+		set wireless.radio1.txpower=25
+	#2G
+		set wireless.default_radio0.ssid="WIFIMEDIA.VN"
+		#set wireless.default_radio0.macaddr=40:A5:EF:63:E7:6D
+		#set wireless.default_radio0.maxassoc=30
+		set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
+		add_list wireless.radio0.ht_capab="SHORT-GI-20"
+		add_list wireless.radio0.ht_capab="SHORT-GI-40"
+		add_list wireless.radio0.ht_capab="RX-STBC1"
+		add_list wireless.radio0.ht_capab="DSSS_CCK-40"
+		set wireless.radio0.country="US"
+		set wireless.radio0.txpower=29
+		set wireless.radio0.channel=auto
 		commit wireless
 	EOF
 
@@ -199,28 +211,6 @@ fi
 #EOF
 #}
 
-
-uci batch <<-EOF
-	set wireless.radio1.channel=157
-	#set wireless.radio1.htmode=VHT40
-	#set wireless.default_radio1.ssid="VIETNAM POST"
-	set wireless.radio0.country="US"
-	set wireless.radio1.txpower=25
-#5G
-	set wireless.default_radio0.ssid="OPENWIFI"
-	#set wireless.default_radio0.macaddr=40:A5:EF:63:E7:6D
-
-	#set wireless.default_radio0.maxassoc=30
-	set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
-	add_list wireless.radio0.ht_capab="SHORT-GI-20"
-	add_list wireless.radio0.ht_capab="SHORT-GI-40"
-	add_list wireless.radio0.ht_capab="RX-STBC1"
-	add_list wireless.radio0.ht_capab="DSSS_CCK-40"
-	set wireless.radio0.country="US"
-	set wireless.radio0.txpower=29
-	set wireless.radio0.channel=auto
-	commit wireless
-EOF
 #enable wifi
 uci set wireless.radio0.disabled="0"
 uci commit wireless
