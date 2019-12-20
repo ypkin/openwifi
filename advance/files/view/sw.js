@@ -19,6 +19,11 @@ return L.view.extend({
 	
 		sw = s.option(form.Flag,"switch_port","All Port LAN & WAN")
 		sw.rmempty = false
+		sw.write = sw.remove = function(section_id, value) {
+			if(value != null ){
+				
+			}			
+		}
 		return m.render();
 	}
 });
