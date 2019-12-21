@@ -24,7 +24,9 @@ return L.view.extend({
 		o = s.option(form.Flag,'switch_port',_('All Port LAN & WAN'));
 		o.rmempty = false;
 		o.write = function(section_id, value) {
-			sw_enabled = +value;			
+			sw_enabled = +value;
+			if (!sw_enabled)
+			uci.set('wifimedia', '@switchmode[0]', 'switch_port','1')
 		};
 		o.load = function(section_id) {
 			return (sw_enabled == 1 &&
