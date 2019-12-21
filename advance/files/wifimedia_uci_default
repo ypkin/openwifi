@@ -81,7 +81,7 @@ if [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND
 		set wireless.default_radio0.maxassoc=30
 		set wireless.@wifi-iface[0].ssid=LoopPos
 		#set wireless.@wifi-iface[0].ssid=PDA_$rnd
-		#set wireless.@wifi-iface[0].encryption="psk2"
+		set wireless.@wifi-iface[0].encryption="psk2"
 		set wireless.@wifi-iface[0].key="loopposA@"
 		set wireless.radio0.disabled=0
 		set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
