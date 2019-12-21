@@ -14,7 +14,7 @@ echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>$_nds
 #IFNAME="eth0.1" #VLAN1
 #IFNAME99="eth0.99" #VLAN1
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
-domain_default=${domain:-portal.nextify.vn/splash}
+domain_default=${domain:-portal.wifioto.net/splash}
 MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 #write file splash
 echo '<!doctype html>
