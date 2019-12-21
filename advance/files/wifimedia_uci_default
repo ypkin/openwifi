@@ -84,6 +84,13 @@ if [ "$model_hardware" == "CF-E355AC_v2" ] || [ "$model_hardware" == "TL-WR741ND
 		#set wireless.@wifi-iface[0].encryption="psk2"
 		#set wireless.@wifi-iface[0].key="loopposA@"
 		set wireless.radio0.disabled=0
+		set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
+		add_list wireless.radio0.ht_capab="SHORT-GI-20"
+		add_list wireless.radio0.ht_capab="SHORT-GI-40"
+		add_list wireless.radio0.ht_capab="RX-STBC1"
+		add_list wireless.radio0.ht_capab="DSSS_CCK-40"
+		set wireless.radio0.country="US"
+		set wireless.radio0.txpower=22
 		commit wireless
 	EOF
 
@@ -127,27 +134,6 @@ elif [ "$model_hardware" == "CF-E320N_v2" ];then
 	uci commit meshdesk
 fi
 
-uci batch <<-EOF
-	#set wireless.radio0.channel=157
-	#set wireless.@wifi-device[-1].channel=6
-	#set wireless.radio0.disabled=0
-	#set wireless.radio1.disabled=0
-#5G
-	#set wireless.default_radio0.ssid="OPENWIFI"
-	#set wireless.default_radio0.macaddr=40:A5:EF:63:E7:6D
-	#set wireless.default_radio1.ssid="VIETNAM POST"
-	#set wireless.default_radio1.maxassoc=30
-	set wireless.radio0.macaddr=$(cat /sys/class/ieee80211/phy0/macaddress)
-	add_list wireless.radio0.ht_capab="SHORT-GI-20"
-	add_list wireless.radio0.ht_capab="SHORT-GI-40"
-	add_list wireless.radio0.ht_capab="RX-STBC1"
-	add_list wireless.radio0.ht_capab="DSSS_CCK-40"
-	set wireless.radio0.country="US"
-	set wireless.radio0.txpower=22
-	#set wireless.radio0.htmode=VHT40
-	#set wireless.radio1.txpower=20
-	commit wireless
-EOF
 #enable wifi
 uci set wireless.radio0.disabled="0"
 uci commit wireless
