@@ -1,15 +1,19 @@
 'use strict';
-'require fs';
 'require ui';
 'require uci';
+'require rpc';
 'require form';
-'require network';
-'require tools.widgets as widgets';
-
 return L.view.extend({
 
+	load: function() {
+		return Promise.all([
+			uci.load('luci'),
+			uci.load('system')
+		]);
+	},
+
 	render: function() {
-		var m, s, o;
+		var sw_enabled,m, s, o;
 
 		m = new form.Map('wifimedia');
 
@@ -17,18 +21,17 @@ return L.view.extend({
 		s.anonymous = true;
 		s.addremove = true;
 	
-		o = s.option(form.Flag,"switch_port","All Port LAN & WAN")
-		o.rmempty = false
-		o.write = function(section_id, value){
-			sw_port_enable = +value
-			if(!sw_port_enable){
-					uci.del('network','lan');
-					uci.set('network','wan','proto','dhcp');
-					uci.set('network','wan','ifname','eth0.1 eth0.2');
-					uci.set('wireless','@wifi-iface[0]','network','wan');
-					uci.commit();
-				}
-			}
+		o = s.option(form.Flag,'switch_port',_('All Port LAN & WAN'));
+		o.rmempty = false;
+		o.write = function(section_id, value) {
+			sw_enabled = +value;			
+		};
+		o.load = function(section_id) {
+			return (sw_enabled == 1 &&
+				uci.get('wifimedia', '@switchmode[0]') != null &&
+				uci.get('wifimedia', '@switchmode[0]', 'switch_port') != 0) ? '1' : '0';
+			};
+
 		return m.render();
 	}
 });
