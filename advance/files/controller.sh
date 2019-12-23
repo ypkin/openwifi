@@ -435,4 +435,13 @@ fi #END RSSI
 
 }
 
+heartbeat(){
+	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
+	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
+	wget -q --timeout=3 \
+		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
+		 -O /dev/null
+}
+
 "$@"
