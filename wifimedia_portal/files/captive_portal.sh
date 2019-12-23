@@ -191,10 +191,6 @@ get_captive_portal_clients() {
              traffic_upload=
          fi
     done
-	#clients_ndsclt=$(cat /tmp/captive_portal_clients | xargs| sed 's/;/,/g'| tr a-z A-Z)
-	###2>/dev/null
-	#wget --post-data="clients=${clients_ndsclt}&gateway_mac=${global_device}" http://api.nextify.vn/clients_around 2>/dev/null
-    #rm /tmp/captive_portal_clients	
  }
 
 write_login(){
