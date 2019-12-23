@@ -19,7 +19,7 @@ define Package/wifimedia_portal
   SUBMENU:=Wifimedia
   SECTION:=dev
   CATEGORY:=Advance
-  DEPENDS:=+nodogsplash +openssl-util
+  DEPENDS:=+nodogsplash
   TITLE:=Wireless LAN HotSpot controller 
   URL:=http://wifimedia.vn
   MENU:=1
