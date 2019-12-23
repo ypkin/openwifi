@@ -17,8 +17,6 @@ end
 s = m:section(TypedSection, "nodogsplash", "")
 s.anonymous = true
 s.addremove = false
---s:option( Value, "ndsname","Name")
---s:option( Value, "nds_apkey","APKEY")
 s:tab("basic","General Setup")
 s:tab("advance","Advanced")
 s:tab("network","Network")
