@@ -19,7 +19,8 @@ define Package/wifimedia_portal
   SUBMENU:=Wifimedia
   SECTION:=dev
   CATEGORY:=Advance
-  TITLE:=Wireless LAN HotSpot controller
+  DEPENDS:=+nodogsplash +openssl-util
+  TITLE:=Wireless LAN HotSpot controller 
   URL:=http://wifimedia.vn
   MENU:=1
   PKGARCH:=all
@@ -45,8 +46,8 @@ define Package/wifimedia_portal/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module
 	$(INSTALL_BIN) ./files/uci_portal $(1)/etc/uci-defaults/uci_portal
 	$(INSTALL_BIN) ./files/captive_portal.sh $(1)/sbin/wifimedia/captive_portal.sh
-	$(INSTALL_BIN) ./files/heartbeat.sh $(1)/sbin/wifimedia/heartbeat.sh
-	$(INSTALL_BIN) ./files/cpnclients.sh $(1)/sbin/wifimedia/cpnclients.sh
+	#$(INSTALL_BIN) ./files/cpn_heartbeat.sh $(1)/sbin/wifimedia/cpn_heartbeat.sh
+	#$(INSTALL_BIN) ./files/cpn_clients_detect.sh $(1)/sbin/wifimedia/cpn_clients_detect.sh
 	#$(INSTALL_BIN) ./files/preauthenticated_rules.sh $(1)/sbin/wifimedia/preauthenticated_rules.sh
 	$(INSTALL_DATA) ./files/wifimedia_portal.lua $(1)/usr/lib/lua/luci/controller/wifimedia/wifimedia_portal.lua
 	$(INSTALL_DATA) ./files/portal_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/wifimedia_portal.lua
