@@ -248,7 +248,7 @@ dhcp_extension(){
 			uci set wireless.default_radio0.network='hotspot'
 			uci set wireless.default_radio1.network='hotspot'
 		else
-			uci set network.local.ipaddr='172.16.99.1'
+			uci set network.local.ipaddr='$ip_lan_gw'
 			uci add_list network.local.network='lan'
 			uci set dhcp.lan.ignore='1'
 			uci set wireless.default_radio0.network='lan'
