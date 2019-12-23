@@ -124,31 +124,4 @@ t = m:section(Table, captive_process_status())
 t.anonymous = true
 
 t:option(DummyValue, "status","Captive portal status")
---[[
-	if nixio.fs.access("/etc/rc.d/S95nodogsplash") then
-	  disable = t:option(Button, "_disable","Disable Startup")
-	  disable.inputstyle = "remove"
-	  function disable.write(self, section)
-			luci.sys.exec("uci set nodogsplash.@nodogsplash[0].enabled='0' && uci commit nodogsplash")
-			luci.util.exec("echo '* * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/roots")
-			luci.util.exec("echo ''>/etc/crontabs/nds && /etc/init.d/cron restart")
-			luci.util.exec("/etc/init.d/nodogsplash disable && /etc/init.d/nodogsplash stop")
-			luci.http.redirect(
-            		luci.dispatcher.build_url("admin", "services", "wifimedia_portal")
-			)			
-	  end
-	else
-	  enable = t:option(Button, "_enable","Enable Startup")
-	  enable.inputstyle = "apply"
-	  function enable.write(self, section)
-			luci.sys.call("uci set nodogsplash.@nodogsplash[0].enabled='1' && uci commit nodogsplash")
-			luci.util.exec("echo '' >/etc/crontabs/roots")
-			luci.util.exec("crontab /etc/cron_nds -u nds && /etc/init.d/cron restart")
-			luci.util.exec("/etc/init.d/nodogsplash enable")
-			luci.http.redirect(
-            		luci.dispatcher.build_url("admin", "services", "wifimedia_portal")
-			)			
-	  end
-	end
-]]--
 return m
