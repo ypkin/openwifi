@@ -199,7 +199,8 @@ start_service() {
 
   config_load nodogsplash
   config_foreach create_instance nodogsplash
-  iptables -I FORWARD -o br-wan -d $(route -n  grep 'UG'  grep 'br-wan'  awk '{ print $2 }') -j ACCEPT
+iptables -I FORWARD -o br-wan -d $(route -n | grep 'UG' | grep 'br-wan' | awk '{ print $2 }') -j ACCEPT
+}																										 
 }
 
 stop_service() {
