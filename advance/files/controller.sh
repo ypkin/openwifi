@@ -313,7 +313,7 @@ if [ "${curl_result}" -eq 0 ]; then
 				rm /etc/init.d/wifimedia_check
 				rm /etc/init.d/S30wifimedia_check
 				rm /etc/init.d/K105wifimedia_check
-				echo "" > /etc/crontabs/wificode
+				rm /etc/crontabs/wificode
 				license_local
 			else
 				echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
@@ -346,7 +346,7 @@ lcs=/etc/opt/wfm_lcs
 if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 	echo "Activated" >/etc/opt/license/status
 	#touch $status
-	echo "" >/etc/crontabs/wificode
+	rm /etc/crontabs/wificode
 	/etc/init.d/cron restart	
 	rm $lcs
 else
@@ -360,7 +360,7 @@ if [ "$uptime" -gt 15 ]; then #>15days
 		#touch $status
 		rm $lcs
 		echo "Activated" >/etc/opt/license/status
-		echo "" >/etc/crontabs/wificode
+		rm /etc/crontabs/wificode
 		/etc/init.d/cron restart
 	else
 		echo "Wrong License Code" >/etc/opt/license/status
