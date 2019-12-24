@@ -41,9 +41,8 @@ define Package/scheduled/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/wifimedia
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module
-
-	#$(INSTALL_BIN) ./files/controller_local.sh $(1)/sbin/wifimedia/controller_local.sh
-	$(INSTALL_BIN) ./files/controller.sh $(1)/sbin/wifimedia/controller.sh
+	$(INSTALL_DATA) ./files/scheduled_conf $(1)/etc/config/scheduled
+	$(INSTALL_BIN) ./files/scheduled_uci $(1)/etc/uci-defaults/scheduled
 	$(INSTALL_BIN) ./files/scheduled.sh $(1)/usr/bin/scheduled.sh
 	$(INSTALL_DATA) ./files/scheduled_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/scheduled.lua
 	$(INSTALL_DATA) ./files/scheduled_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/scheduled.lua
