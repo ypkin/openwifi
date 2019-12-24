@@ -278,6 +278,32 @@ if [ $(cat tmp/cpn_flag) -eq 1 ]; then
 fi		
 }
 
+_boot(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+checking
+action_lan_wlan
+openvpn
+}
+
+_lic(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+license_srv
+}
+
 license_srv() {
 ###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
 echo "" > $licensekey
