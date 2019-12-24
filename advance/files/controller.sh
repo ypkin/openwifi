@@ -313,9 +313,13 @@ if [ "${curl_result}" -eq 0 ]; then
 				rm /etc/init.d/wifimedia_check
 				rm /etc/init.d/S30wifimedia_check
 				rm /etc/init.d/K105wifimedia_check
+				echo "" > /etc/crontabs/wificode
 				license_local
+			else
+				echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
 			fi
-		done	
+		done
+		/etc/init.d/cron restart
 	fi
 fi
 }
