@@ -5,16 +5,5 @@ STOP=90
 
 boot() {
     /etc/init.d/network restart
-	# Wait for network up & running
-	while true; do
-    	ping -c1 -W1 8.8.8.8
-    	if [ ${?} -eq 0 ]; then
-      	  	break
-   	else
-        	sleep 1
-    	fi
-	done
-	ifup wan
-	/sbin/wifimedia/controller.sh checking
-	/sbin/wifimedia/controller.sh action_lan_wlan
+	/sbin/wifimedia/controller.sh _boot
 }
