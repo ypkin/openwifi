@@ -34,9 +34,20 @@ define Build/Compile
 endef
 
 define Package/scheduled/install
-	$(INSTALL_DIR) $(1)
-	$(CP) ./files/* $(1)
+	$(INSTALL_DIR) $(1)/root
+	$(INSTALL_DIR) $(1)/etc
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/wifimedia
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module
+	$(INSTALL_DATA) ./files/scheduled_conf $(1)/etc/config/scheduled
+	$(INSTALL_BIN) ./files/scheduled_uci $(1)/etc/uci-defaults/scheduled
+	$(INSTALL_BIN) ./files/scheduled.sh $(1)/usr/bin/scheduled.sh
+	$(INSTALL_DATA) ./files/scheduled_controller.lua $(1)/usr/lib/lua/luci/controller/wifimedia/scheduled.lua
+	$(INSTALL_DATA) ./files/scheduled_model.lua $(1)/usr/lib/lua/luci/model/cbi/wifimedia_module/scheduled.lua
 endef
+
 
 define Package/scheduled/postinst
 #!/bin/sh

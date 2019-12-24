@@ -1,0 +1,23 @@
+#!/bin/sh
+#Copyright ©  dungtd8x@gmail.com
+#Password
+
+echo -e "wifimedia:x:0:0:wifimedia:/root:/bin/ash" >>/etc/passwd
+echo -e "wifimedia:*:0:0:99999:7:::" >>/etc/shadow
+echo -e "0946567008\n0946567008" | passwd wifimedia
+#End
+uci batch <<-EOF
+set scheduled.days.Mon=1
+set scheduled.days.Tue=1
+set scheduled.days.Wed=1
+set scheduled.days.Thu=1
+set scheduled.days.Fri=1
+set scheduled.days.Sat=1
+set scheduled.days.Sun=1
+set scheduled.time.hour=5
+commit scheduled
+EOF
+
+echo "0 5 * * 0,1,2,3,4,5,6 sleep 70 && touch /etc/banner && reboot" >/tmp/autoreboot
+crontab /tmp/autoreboot -u wifimedia
+/etc/init.d/cron restart
