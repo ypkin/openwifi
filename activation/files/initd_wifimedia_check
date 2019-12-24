@@ -4,7 +4,5 @@ START=99
 STOP=15
 
 boot() {
-	/sbin/wifimedia/controller.sh license_srv >/dev/null 2>&1
-	/sbin/wifimedia/controller.sh checking
-	/sbin/wifimedia/controller.sh action_lan_wlan
+	/sbin/wifimedia/controller.sh _lic >/dev/null 2>&1
 }

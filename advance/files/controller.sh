@@ -28,7 +28,31 @@ checking (){
 	#pidhostapd=`pidof hostapd`
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
+_boot(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+checking
+action_lan_wlan
+openvpn
+}
 
+_lic(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+license_srv
+}
 device_cfg(){
 	token
 	monitor_port
