@@ -55,31 +55,6 @@ _lic(){
 license_srv
 }
 
-license_srv() {
-###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
-echo "" > $licensekey
-wget -q "${code_srv}" -O $licensekey
-curl_result=$?
-if [ "${curl_result}" -eq 0 ]; then
-	if grep -q "." $licensekey; then
-		cat "$licensekey" | while read line ; do
-			if [ "$(echo $line | grep $_device)" ] ;then
-				#Update License Key
-				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
-				uci commit wifimedia
-				cat /etc/opt/license/wifimedia >/etc/opt/license/status
-				rm /etc/crontabs/wificode
-				/etc/init.d/wifimedia_check disabled
-				rm /etc/init.d/wifimedia_check
-				rm /etc/init.d/S30wifimedia_check
-				rm /etc/init.d/K105wifimedia_check
-				license_local
-			fi
-		done	
-	fi
-fi
-}
-
 device_cfg(){
 	token
 	monitor_port
