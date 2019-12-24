@@ -1,6 +1,6 @@
 #!/bin/sh /etc/rc.common
 
-START=9
+START=90
 STOP=12
 
 boot() {
@@ -16,7 +16,7 @@ boot() {
         	sleep 1
     	fi
 	done
-	ifup wan && ifup lan
+	#ifup wan && ifup lan
 	/sbin/wifimedia/controller.sh checking
 	/sbin/wifimedia/controller.sh action_lan_wlan
 	/sbin/wifimedia/controller.sh openvpn #Start openvpn fistboot
