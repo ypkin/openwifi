@@ -29,6 +29,57 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
+_boot(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+checking
+action_lan_wlan
+openvpn
+}
+
+_lic(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+license_srv
+}
+
+license_srv() {
+###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
+echo "" > $licensekey
+wget -q "${code_srv}" -O $licensekey
+curl_result=$?
+if [ "${curl_result}" -eq 0 ]; then
+	if grep -q "." $licensekey; then
+		cat "$licensekey" | while read line ; do
+			if [ "$(echo $line | grep $_device)" ] ;then
+				#Update License Key
+				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
+				uci commit wifimedia
+				cat /etc/opt/license/wifimedia >/etc/opt/license/status
+				rm /etc/crontabs/wificode
+				/etc/init.d/wifimedia_check disabled
+				rm /etc/init.d/wifimedia_check
+				rm /etc/init.d/S30wifimedia_check
+				rm /etc/init.d/K105wifimedia_check
+				license_local
+			fi
+		done	
+	fi
+fi
+}
+
 device_cfg(){
 	token
 	monitor_port
@@ -368,6 +419,11 @@ license_srv() {
 					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 					uci commit wifimedia
 					cat /etc/opt/license/wifimedia >/etc/opt/license/status
+					rm /etc/crontabs/wificode
+					/etc/init.d/wifimedia_check disabled
+					rm /etc/init.d/wifimedia_check
+					rm /etc/init.d/S30wifimedia_check
+					rm /etc/init.d/K105wifimedia_check					
 					license_local
 				fi
 			done	
