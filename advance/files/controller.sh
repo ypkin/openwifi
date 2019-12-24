@@ -278,6 +278,32 @@ if [ $(cat tmp/cpn_flag) -eq 1 ]; then
 fi		
 }
 
+_boot(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+checking
+action_lan_wlan
+openvpn
+}
+
+_lic(){
+	while true; do
+    	ping -c1 -W1 8.8.8.8
+    	if [ ${?} -eq 0 ]; then
+      	  	break
+   	else
+        	sleep 1
+    	fi
+	done
+license_srv
+}
+
 license_srv() {
 ###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
 echo "" > $licensekey
@@ -433,6 +459,15 @@ if [ $rssi_on == "1" ];then
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
 
+}
+
+heartbeat(){
+	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
+	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
+	wget -q --timeout=3 \
+		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
+		 -O /dev/null
 }
 
 "$@"
