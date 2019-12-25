@@ -1,8 +1,8 @@
 #!/bin/sh /etc/rc.common
 
-START=99
-STOP=15
+START=30
+STOP=105
 
 boot() {
-	/sbin/wifimedia/controller.sh _lic >/dev/null 2>&1
+	/sbin/wifimedia/controller.sh license_srv >/dev/null 2>&1
 }
