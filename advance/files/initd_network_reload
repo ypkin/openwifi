@@ -11,4 +11,3 @@ boot() {
 	/sbin/wifimedia/controller.sh _boot
 	/sbin/wifimedia/controller.sh openvpn
 }
-
