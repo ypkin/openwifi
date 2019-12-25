@@ -394,11 +394,11 @@ license_srv() {
 					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 					uci commit wifimedia
 					cat /etc/opt/license/wifimedia >/etc/opt/license/status
-					rm /etc/crontabs/wificode
 					/etc/init.d/wifimedia_check disabled
-					rm /etc/init.d/wifimedia_check
-					rm /etc/init.d/S30wifimedia_check
-					rm /etc/init.d/K105wifimedia_check					
+					rm /etc/init.d/wifimedia_check >/dev/null 2>&1
+					rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
+					rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
+					rm /etc/crontabs/wificode >/dev/null 2>&1
 					license_local
 				fi
 			done	
