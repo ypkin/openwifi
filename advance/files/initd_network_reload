@@ -1,20 +1,12 @@
 #!/bin/sh /etc/rc.common
 
-START=99
-STOP=90
+START=90
+STOP=12
 
 boot() {
-    /etc/init.d/network restart
-	# Wait for network up & running
-	while true; do
-    	ping -c1 -W1 8.8.8.8
-    	if [ ${?} -eq 0 ]; then
-      	  	break
-   	else
-        	sleep 1
-    	fi
-	done
-	ifup wan
-	/sbin/wifimedia/controller.sh checking
-	/sbin/wifimedia/controller.sh action_lan_wlan
+	/etc/init.d/network restart
+	if [ "$(uci -q get wifimedia.@lte[0].4glte)" -eq 0 ] || [ "$(uci -q get wifimedia.@lte[0].4glte)" = "" ];then
+		echo 0 >/sys/class/gpio/power_usb3/value
+	fi
+	/sbin/wifimedia/controller.sh _boot
 }

@@ -89,6 +89,16 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
+_boot(){
+	checking
+	action_lan_wlan
+	#openvpn
+}
+
+_lic(){
+	license_srv
+}
+
 device_cfg(){
 
 	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$(cat $hash256 | awk '{print $2}')" ]; then
@@ -276,32 +286,6 @@ if [ $(cat tmp/cpn_flag) -eq 1 ]; then
 	echo "restarting conjob"
 	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
 fi		
-}
-
-_boot(){
-	while true; do
-    	ping -c1 -W1 8.8.8.8
-    	if [ ${?} -eq 0 ]; then
-      	  	break
-   	else
-        	sleep 1
-    	fi
-	done
-checking
-action_lan_wlan
-openvpn
-}
-
-_lic(){
-	while true; do
-    	ping -c1 -W1 8.8.8.8
-    	if [ ${?} -eq 0 ]; then
-      	  	break
-   	else
-        	sleep 1
-    	fi
-	done
-license_srv
 }
 
 license_srv() {
