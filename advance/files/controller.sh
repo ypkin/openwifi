@@ -227,11 +227,11 @@ cat $response_file | while read line ; do
 			uci set network.wan="interface"
 			uci set network.wan.proto="static"
 			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0"		
 		else ##DHCP Client nhan IP
 			uci delete network.wan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0"		
 		fi	
 	##Cau hinh DHCP
 	elif [  "$key" = "lan.dhcp.start" ];then
