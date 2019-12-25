@@ -280,7 +280,6 @@ uci batch << EOF
 	commit dhcp
 EOF
 
-
 touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
