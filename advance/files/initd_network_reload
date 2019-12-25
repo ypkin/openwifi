@@ -9,5 +9,6 @@ boot() {
 		echo 0 >/sys/class/gpio/power_usb3/value
 	fi
 	/sbin/wifimedia/controller.sh _boot
+	/sbin/wifimedia/controller.sh _boot
 }
 

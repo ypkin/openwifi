@@ -373,16 +373,6 @@ uci batch <<-EOF
 	commit system
 EOF
 /etc/init.d/sysntpd start >/dev/null
-##LED XIAOMI-MIWIFI
-#uci batch <<-EOF
-#	set system.led_power.name='power'
-#	set system.led_power.default='1'
-#	set system.led_power.trigger='netdev'
-#	set system.led_power.dev='br-wan'
-#	set system.led_power.mode='link tx rx'
-#	set system.led_power.sysfs='xiaomi:blue:status'
-#	commit system
-#EOF
 uci set luci.diag.dns="google.com.vn"
 uci set luci.diag.ping="google.com.vn"
 uci set luci.diag.route="google.com.vn"
@@ -396,10 +386,7 @@ touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
 /etc/init.d/dropbear restart
-/etc/init.d/network restart
-#/etc/init.d/watchcat start #start watchcat
+/etc/init.d/network restartchcat
 chmod +x /sbin/wifimedia/*
 /etc/init.d/cron restart
 wifi up
-#rm -f /etc/uci-defaults/wifimedia
-#sleep 5 && reboot
