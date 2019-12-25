@@ -426,12 +426,12 @@ license_local() {
 	lcs=/etc/opt/wfm_lcs
 	if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 		echo "Activated" >/etc/opt/license/status
-		#touch $status
-		echo "" >/etc/crontabs/wificode
-		/etc/init.d/cron restart	
-		rm $lcs
+		/etc/init.d/cron restart
+		rm /etc/crontabs/wificode >/dev/null 2>&1
+		rm $lcs >/dev/null 2>&1
 	else
-		echo "Wrong License Code" >/etc/opt/license/status
+		echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
+		echo "Not Activated" >/etc/opt/license/status
 	fi
 	if [ "$uptime" -gt 15 ]; then #>15days
 		if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
@@ -439,10 +439,10 @@ license_local() {
 			uci set wireless.radio1.disabled="0"
 			uci commit wireless
 			wifi
-			#touch $status
-			rm $lcs
-			echo "Activated" >/etc/opt/license/status
-			echo "" >/etc/crontabs/wificode
+			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
+			echo "Not Activated" >/etc/opt/license/status
+			rm /etc/crontabs/wificode >/dev/null 2>&1
+			rm $lcs >/dev/null 2>&1
 			/etc/init.d/cron restart
 		else
 			echo "Wrong License Code" >/etc/opt/license/status
