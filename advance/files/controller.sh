@@ -381,31 +381,6 @@ action_lan_wlan(){
 	fi
 }
 
-license_srv() {
-	###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
-	echo "" > $licensekey
-	wget -q "${code_srv}" -O $licensekey
-	curl_result=$?
-	if [ "${curl_result}" -eq 0 ]; then
-		if grep -q "." $licensekey; then
-			cat "$licensekey" | while read line ; do
-				if [ "$(echo $line | grep $_device)" ] ;then
-					#Update License Key
-					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
-					uci commit wifimedia
-					cat /etc/opt/license/wifimedia >/etc/opt/license/status
-					/etc/init.d/wifimedia_check disabled
-					rm /etc/init.d/wifimedia_check >/dev/null 2>&1
-					rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
-					rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
-					rm /etc/crontabs/wificode >/dev/null 2>&1
-					license_local
-				fi
-			done	
-		fi
-	fi
-}
-
 license_local() {
 	first_time=$(cat /etc/opt/first_time.txt)
 	timenow=$(date +"%s")
@@ -439,13 +414,13 @@ license_local() {
 			uci set wireless.radio1.disabled="0"
 			uci commit wireless
 			wifi
-			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
-			echo "Not Activated" >/etc/opt/license/status
+			echo "Activated" >/etc/opt/license/status
 			rm /etc/crontabs/wificode >/dev/null 2>&1
 			rm $lcs >/dev/null 2>&1
 			/etc/init.d/cron restart
 		else
-			echo "Wrong License Code" >/etc/opt/license/status
+			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
+			echo "Not Activated" >/etc/opt/license/status
 			uci set wireless.radio0.disabled="1"
 			uci set wireless.radio1.disabled="1"
 			uci commit wireless
