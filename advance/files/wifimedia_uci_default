@@ -149,9 +149,9 @@ uci batch <<-EOF
 	commit firewall
 	EOF
 	
-NET_ID="private"
-FW_ZONE="private"
-IFNAME="eth0.1" #VLAN1
+NET_ID="hotspot"
+FW_ZONE="hotspot"
+IFNAME="eth0.300" #VLAN1
 uci batch << EOF
 	set network.${NET_ID}=interface
 	set network.${NET_ID}.ifname=${IFNAME}
@@ -192,7 +192,6 @@ uci batch << EOF
 	commit network
 	commit dhcp
 EOF
-	
 #Password	
 echo -e "admin:x:1000:1000:admin:/root:/bin/false" >>/etc/passwd
 echo -e "admin:*:0:0:99999:7:::" >>/etc/shadow
