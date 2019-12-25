@@ -308,12 +308,11 @@ if [ "${curl_result}" -eq 0 ]; then
 				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
 				cat /etc/opt/license/wifimedia >/etc/opt/license/status
-				rm /etc/crontabs/wificode
 				/etc/init.d/wifimedia_check disabled
-				rm /etc/init.d/wifimedia_check
-				rm /etc/init.d/S30wifimedia_check
-				rm /etc/init.d/K105wifimedia_check
-				rm /etc/crontabs/wificode
+				rm /etc/init.d/wifimedia_check >/dev/null 2>&1
+				rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
+				rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
+				rm /etc/crontabs/wificode >/dev/null 2>&1
 				license_local
 			else
 				echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
@@ -346,7 +345,7 @@ lcs=/etc/opt/wfm_lcs
 if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 	echo "Activated" >/etc/opt/license/status
 	#touch $status
-	rm /etc/crontabs/wificode
+	rm /etc/crontabs/wificode >/dev/null 2>&1
 	/etc/init.d/cron restart	
 	rm $lcs
 else
@@ -360,7 +359,7 @@ if [ "$uptime" -gt 15 ]; then #>15days
 		#touch $status
 		rm $lcs
 		echo "Activated" >/etc/opt/license/status
-		rm /etc/crontabs/wificode
+		rm /etc/crontabs/wificode >/dev/null 2>&1
 		/etc/init.d/cron restart
 	else
 		echo "Wrong License Code" >/etc/opt/license/status
@@ -409,7 +408,7 @@ get_client_connect_wlan(){
 	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;/,/g'| tr a-z A-Z)
 	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}" http://api.nextify.vn/clients_around -O /dev/null
 	echo $client_connect_wlan
-	rm /tmp/client_connect_wlan
+	rm /tmp/client_connect_wlan >/dev/null 2>&1
 }
 
 rssi() {
