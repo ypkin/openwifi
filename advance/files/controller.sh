@@ -29,6 +29,16 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
+_boot(){
+	checking
+	action_lan_wlan
+	openvpn
+}
+
+_lic(){
+	license_srv
+}
+
 device_cfg(){
 	token
 	monitor_port
