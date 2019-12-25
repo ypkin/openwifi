@@ -318,10 +318,8 @@ if [ "${curl_result}" -eq 0 ]; then
 				uci commit wifimedia
 				cat /etc/opt/license/wifimedia >/etc/opt/license/status
 				rm /etc/crontabs/wificode
-				/etc/init.d/wifimedia_check disabled
+				/etc/init.d/wifimedia_check disable
 				rm /etc/init.d/wifimedia_check
-				rm /etc/init.d/S30wifimedia_check
-				rm /etc/init.d/K105wifimedia_check
 				license_local
 			fi
 		done	
