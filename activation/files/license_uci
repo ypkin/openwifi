@@ -8,11 +8,7 @@ temp_dir="/tmp/crontabs"
 if [ ! -d "$temp_dir" ]; then
 	mkdir $temp_dir
 fi
-if [ "$model_hardware" == "TL-WR840N_v6" ] || [ "$model_hardware" == "TL-WR841N_v14" ];then
-	echo "0 0 * * * /sbin/wifimedia/controller.sh lgw_srv" > $temp_dir/wificode
-else 
-	echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" >$temp_dir/wificode
-fi	
+	
 echo "Wrong License Code & auto reboot" >/etc/opt/license/status
 crontab $temp_dir/wificode -u wificode
 /etc/init.d/cron restart
