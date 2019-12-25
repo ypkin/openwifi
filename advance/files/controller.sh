@@ -317,11 +317,11 @@ if [ "${curl_result}" -eq 0 ]; then
 				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
 				cat /etc/opt/license/wifimedia >/etc/opt/license/status
-				rm /etc/crontabs/wificode
-				/etc/init.d/wifimedia_check disabled
-				rm /etc/init.d/wifimedia_check
-				rm /etc/init.d/S30wifimedia_check
-				rm /etc/init.d/K105wifimedia_check
+				rm /etc/crontabs/wificode >/dev/null 2>&1
+				/etc/init.d/wifimedia_check disabled 
+				rm /etc/init.d/wifimedia_check >/dev/null 2>&1
+				rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
+				rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
 				license_local
 			fi
 		done	
@@ -351,9 +351,9 @@ lcs=/etc/opt/wfm_lcs
 if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 	echo "Activated" >/etc/opt/license/status
 	#touch $status
-	echo "" >/etc/crontabs/wificode
+	rm  /etc/crontabs/wificode >/dev/null 2>&1
 	/etc/init.d/cron restart	
-	rm $lcs
+	rm $lcs >/dev/null 2>&1
 else
 		echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
 		echo "Not Activated" >/etc/opt/license/status
@@ -363,9 +363,9 @@ if [ "$uptime" -gt 15 ]; then #>15days
 		uci set wireless.radio0.disabled="0"
 		uci commit wireless
 		wifi
-		rm $lcs
 		echo "Activated" >/etc/opt/license/status
-		echo "" >/etc/crontabs/wificode
+		rm $lcs >/dev/null 2>&1
+		rm /etc/crontabs/wificode >/dev/null 2>&1
 		/etc/init.d/cron restart
 	else
 		echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
