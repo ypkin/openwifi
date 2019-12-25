@@ -368,11 +368,11 @@ license_srv() {
 					#Update License Key
 					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 					uci commit wifimedia
-					cat /etc/opt/license/wifimedia >/etc/opt/license/status
+					echo "Activated" >/etc/opt/license/status
 					/etc/init.d/wifimedia_check disable
 					rm /etc/init.d/wifimedia_check >/dev/null 2>&1
-					rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
-					rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
+					#rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
+					#rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
 					rm /etc/crontabs/wificode >/dev/null 2>&1
 					license_local
 				fi
@@ -414,13 +414,13 @@ license_local() {
 			uci set wireless.radio1.disabled="0"
 			uci commit wireless
 			wifi
-			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
-			echo "Not Activated" >/etc/opt/license/status
+			echo "Activated" >/etc/opt/license/status
 			rm /etc/crontabs/wificode >/dev/null 2>&1
 			rm $lcs >/dev/null 2>&1
 			/etc/init.d/cron restart
 		else
-			echo "Wrong License Code" >/etc/opt/license/status
+			echo "0 0 * * * /sbin/wifimedia/controller.sh license_srv" > /etc/crontabs/wificode
+			echo "Not Activated" >/etc/opt/license/status
 			uci set wireless.radio0.disabled="1"
 			uci set wireless.radio1.disabled="1"
 			uci commit wireless
