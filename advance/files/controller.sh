@@ -89,6 +89,16 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
+_boot(){
+	checking
+	action_lan_wlan
+	#openvpn
+}
+
+_lic(){
+	license_srv
+}
+
 device_cfg(){
 
 	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$(cat $hash256 | awk '{print $2}')" ]; then
@@ -278,23 +288,6 @@ if [ $(cat tmp/cpn_flag) -eq 1 ]; then
 fi		
 }
 
-_boot(){
-	checking
-	action_lan_wlan
-}
-
-_lic(){
-	#while true; do
-    #	ping -c1 -W1 8.8.8.8
-    #	if [ ${?} -eq 0 ]; then
-    #  	  	break
-   	#else
-    #    	sleep 1
-    #	fi
-	#done
-license_srv
-}
-
 license_srv() {
 ###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
 echo "" > $licensekey
@@ -307,11 +300,11 @@ if [ "${curl_result}" -eq 0 ]; then
 				#Update License Key
 				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
-				cat /etc/opt/license/wifimedia >/etc/opt/license/status
-				/etc/init.d/wifimedia_check disabled
+				echo "Activated" >/etc/opt/license/status
+				/etc/init.d/wifimedia_check disable
 				rm /etc/init.d/wifimedia_check >/dev/null 2>&1
-				rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
-				rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
+				#rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
+				#rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
 				rm /etc/crontabs/wificode >/dev/null 2>&1
 				license_local
 			fi

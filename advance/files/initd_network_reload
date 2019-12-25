@@ -1,9 +1,9 @@
 #!/bin/sh /etc/rc.common
 
-START=99
-STOP=90
+START=90
+STOP=12
 
 boot() {
-    /etc/init.d/network restart
+	/etc/init.d/network restart
 	/sbin/wifimedia/controller.sh _boot
 }
