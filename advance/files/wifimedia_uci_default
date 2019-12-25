@@ -19,7 +19,7 @@ uci -q get wifimedia.@builddate[0] || {
 	uci batch <<-EOF
 	add wifimedia builddate
 	set wifimedia.@builddate[0]=builddate
-	set wifimedia.@builddate[0].date=14/12/2019
+	set wifimedia.@builddate[0].date=25/12/2019
 	commit wifimedia
 EOF
 }
