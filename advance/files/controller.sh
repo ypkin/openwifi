@@ -300,12 +300,12 @@ if [ "${curl_result}" -eq 0 ]; then
 				#Update License Key
 				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
-				cat /etc/opt/license/wifimedia >/etc/opt/license/status
+				echo "Activated" >/etc/opt/license/status
 				rm /etc/crontabs/wificode >/dev/null 2>&1
-				/etc/init.d/wifimedia_check disabled 
+				/etc/init.d/wifimedia_check disable
 				rm /etc/init.d/wifimedia_check >/dev/null 2>&1
-				rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
-				rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
+				#rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
+				#rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
 				license_local
 			fi
 		done	
@@ -334,7 +334,6 @@ status=/etc/opt/wfm_status
 lcs=/etc/opt/wfm_lcs
 if [ "$(uci -q get wifimedia.@hash256[0].wfm)" == "$(cat /etc/opt/license/wifimedia)" ]; then
 	echo "Activated" >/etc/opt/license/status
-	#touch $status
 	rm  /etc/crontabs/wificode >/dev/null 2>&1
 	/etc/init.d/cron restart	
 	rm $lcs >/dev/null 2>&1
