@@ -9,9 +9,7 @@ local uci = require "luci.model.uci".cursor()
 m = Map("wifimedia", "")
 m.apply_on_parse = true
 function m.on_apply(self)
-	--luci.sys.call("env -i /bin/ubus call network reload >/dev/null 2>/dev/null")
 	luci.sys.call("env -i /bin/ubus call network restart >/dev/null 2>/dev/null")
-	--luci.http.redirect(luci.dispatcher.build_url("admin","wifimedia","advance"))
 end
 
 s = m:section(TypedSection, "switchmode","Ethernet Switch")
