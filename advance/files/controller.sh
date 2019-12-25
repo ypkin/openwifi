@@ -79,6 +79,31 @@ action_lan_wlan(){
 	fi
 }
 
+license_srv() {
+	###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
+	echo "" > $licensekey
+	wget -q "${code_srv}" -O $licensekey
+	curl_result=$?
+	if [ "${curl_result}" -eq 0 ]; then
+		if grep -q "." $licensekey; then
+			cat "$licensekey" | while read line ; do
+				if [ "$(echo $line | grep $_device)" ] ;then
+					#Update License Key
+					uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
+					uci commit wifimedia
+					echo "Activated" >/etc/opt/license/status
+					/etc/init.d/wifimedia_check disable
+					rm /etc/init.d/wifimedia_check >/dev/null 2>&1
+					#rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
+					#rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
+					rm /etc/crontabs/wificode >/dev/null 2>&1
+					license_local
+				fi
+			done	
+		fi
+	fi
+}
+
 license_local() {
 	first_time=$(cat /etc/opt/first_time.txt)
 	timenow=$(date +"%s")
