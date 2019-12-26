@@ -484,12 +484,38 @@ fi #END RSSI
 }
 
 heartbeat(){
+
+	NEWLINE_IFS='
+'
+	OLD_IFS="$IFS"; IFS=$NEWLINE_IFS
+	signal=''
+	host=''
+	mac=''
+	touch /tmp/ap_clients
+	for iface in `iw dev | grep Interface | awk '{print $2}'`; do
+		for line in `iwinfo $iface assoclist`; do
+			if echo "$line" | grep -q "SNR"; then
+				if [ -f /etc/ethers ]; then
+					mac=$(echo $line | awk '{print $1}' FS=" ")
+					host=$(awk -v MAC=$mac 'tolower($1)==MAC {print $1}' FS=" " /etc/ethers)
+					data=";$mac"
+					echo $data >>/tmp/ap_clients
+				fi
+			fi
+		done
+	done
+	IFS="$OLD_IFS"
+	ap_clients=$(cat /tmp/ap_clients | xargs| sed 's/;//g'| tr a-z A-Z)
+	NUM_CLIENTS=$(cat /tmp/ap_clients | wc -l)
+
 	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
 	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
 	wget -q --timeout=3 \
-		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
+		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
 		 -O /dev/null
+	echo $NUM_CLIENTS
+	rm /tmp/ap_clients	 
 }
 
 openvpn(){
