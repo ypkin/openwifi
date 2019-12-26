@@ -197,21 +197,6 @@ elif [ "$newifi3" == "Newifi-D2" ];then
 	echo "NEWIFI" >/etc/hardware	
 fi
 
-#Add vitual SSID
-#For abng
-#uci -q get wireless.@wifi-iface[1] || {
-#        uci batch <<EOF
-#        add wireless wifi-iface
-#        set wireless.@wifi-iface[1].device=radio0
-#        set wireless.@wifi-iface[1].mode=ap
-#        set wireless.@wifi-iface[1].network=lan
-#        set wireless.@wifi-iface[1].ssid=OPENWIFIx2
-#		set wireless.@wifi-iface[1].disabled=1
-#        commit wireless
-#EOF
-#}
-
-
 #enable wifi
 uci set wireless.radio0.disabled="0"
 uci commit wireless
@@ -313,7 +298,7 @@ echo -e "wifimedia\nwifimedia" | passwd root
 #End
 
 #Cron heartbeat
-echo '* * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/root
+echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/root
 
 #Info
 CODENAME="wifimedia"
@@ -327,13 +312,6 @@ uci batch <<-EOF
 	commit wifimedia
 EOF
 
-#uci batch <<-EOF
-#	del openvpn.@openvpn[0]
-#	del openvpn.@openvpn[1]
-#	del openvpn.@openvpn[2]
-#	del openvpn.@openvpn[3]
-#	commit openvpn
-#EOF
 echo "" >/etc/config/openvpn
 source /etc/openwrt_release
 rm -f /etc/openwrt_release
@@ -345,13 +323,8 @@ echo 'DISTRIB_CODENAME="'"$DISTRIB_CODENAME"'"' >> /etc/openwrt_release
 echo 'DISTRIB_TARGET="'"$DISTRIB_TARGET"'"' >> /etc/openwrt_release
 echo 'DISTRIB_DESCRIPTION="'"$DISTRIB_DESCRIPTION"'"' >> /etc/openwrt_release
 
-#rm -f /etc/privoxy/default.action
-#rm -f /etc/privoxy/default.filter
-
-#chmod a+x /sbin/wifimedia/*.sh
 /etc/init.d/system reload
 /etc/init.d/led reload
-
 /etc/init.d/cron start
 /etc/init.d/cron enable
 /etc/init.d/wifimedia_upgrade enable
@@ -386,7 +359,7 @@ touch /etc/opt/wfm_status
 rm -f /etc/banner
 mv /etc/banner_ /etc/banner
 /etc/init.d/dropbear restart
-/etc/init.d/network restartchcat
+/etc/init.d/network restart
 chmod +x /sbin/wifimedia/*
 /etc/init.d/cron restart
 wifi up
