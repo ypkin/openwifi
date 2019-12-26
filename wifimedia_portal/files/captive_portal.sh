@@ -30,6 +30,7 @@ MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 nds_status=`uci -q get nodogsplash.@nodogsplash[0].enabled`
 heartbeat_url=`uci -q get wifimedia.@nodogsplash[0].heartbeat`
 ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+ip_hotspot_gw=$(ifconfig br-hotspot | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 source /lib/functions/network.sh
 config_captive_portal() {
 	if [ $nds_status -eq 0 ];then
@@ -242,13 +243,13 @@ dhcp_extension(){
 	uci del network.local.network
 	if [ $relay != "" ];then
 		if [ $NET_ID = "br-hotspot" ];then
-			uci set network.local.ipaddr='10.68.255.1'
+			uci set network.local.ipaddr='$ip_hotspot_gw'
 			uci add_list network.local.network='hotspot'
 			uci set dhcp.hotspot.ignore='1'
 			uci set wireless.default_radio0.network='hotspot'
 			uci set wireless.default_radio1.network='hotspot'
 		else
-			uci set network.local.ipaddr='172.16.99.1'
+			uci set network.local.ipaddr='$ip_lan_gw'
 			uci add_list network.local.network='lan'
 			uci set dhcp.lan.ignore='1'
 			uci set wireless.default_radio0.network='lan'
@@ -273,7 +274,7 @@ dhcp_extension(){
 cpn_detect(){
 	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpnurl`
 	if [ $cpn_status -eq 0 ];then
-		echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
+		echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
 	fi
 }
 "$@"
