@@ -313,7 +313,30 @@ echo $ports_data
 #rm /tmp/monitor_port
 }
 _detect_clients(){
-	get_client_connect_wlan $cpn_url
+	get_client_connect_wlan
+	_post_clients
+}
+
+heartbeat(){
+	get_client_connect_wlan
+	_get_server
+}
+
+_post_clients(){
+	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
+	echo $client_connect_wlan
+	rm /tmp/client_connect_wlan	
+}
+
+_get_server(){
+	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
+	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
+	wget -q --timeout=3 \
+		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
+		 -O /dev/null
+	echo $NUM_CLIENTS
+	rm /tmp/client_connect_wlan	 
 }
 
 ##Sent Client MAC to server Nextify
@@ -344,12 +367,12 @@ get_client_connect_wlan(){
 	done
 	IFS="$OLD_IFS"
 	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;//g'| tr a-z A-Z)
-	number_client=$(cat /tmp/client_connect_wlan | wc -l)
+	NUM_CLIENTS=$(cat /tmp/client_connect_wlan | wc -l)
 	#monitor_port
 	#wget --post-data="&access_point_macs=${global_device}&mac_clients=${client_connect_wlan}&clients=${clients}" $cpn_url -O /dev/null #https://api.telitads.vn/v1/access_points/state
-	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
-	echo $client_connect_wlan
-	rm /tmp/client_connect_wlan
+	#wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&num_clients=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" $_url -O /dev/null #http://api.nextify.vn/clients_around
+	#echo $client_connect_wlan
+	#rm /tmp/client_connect_wlan
 }
 
 action_lan_wlan(){
@@ -481,41 +504,6 @@ if [ $rssi_on == "1" ];then
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
 
-}
-
-heartbeat(){
-
-	NEWLINE_IFS='
-'
-	OLD_IFS="$IFS"; IFS=$NEWLINE_IFS
-	signal=''
-	host=''
-	mac=''
-	touch /tmp/ap_clients
-	for iface in `iw dev | grep Interface | awk '{print $2}'`; do
-		for line in `iwinfo $iface assoclist`; do
-			if echo "$line" | grep -q "SNR"; then
-				if [ -f /etc/ethers ]; then
-					mac=$(echo $line | awk '{print $1}' FS=" ")
-					host=$(awk -v MAC=$mac 'tolower($1)==MAC {print $1}' FS=" " /etc/ethers)
-					data=";$mac"
-					echo $data >>/tmp/ap_clients
-				fi
-			fi
-		done
-	done
-	IFS="$OLD_IFS"
-	ap_clients=$(cat /tmp/ap_clients | xargs| sed 's/;//g'| tr a-z A-Z)
-	NUM_CLIENTS=$(cat /tmp/ap_clients | wc -l)
-
-	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
-	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
-	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	wget -q --timeout=3 \
-		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
-		 -O /dev/null
-	echo $NUM_CLIENTS
-	rm /tmp/ap_clients	 
 }
 
 openvpn(){
