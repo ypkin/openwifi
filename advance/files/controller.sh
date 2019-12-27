@@ -373,8 +373,41 @@ if [ "${curl_result}" -eq 0 ]; then
 	done	
 fi
 }
+
+_detect_clients(){
+	get_client_connect_wlan
+	_post_clients
+}
+
+heartbeat(){
+	get_client_connect_wlan
+	_get_server
+}
+
+_post_clients(){
+	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
+	echo $client_connect_wlan
+	rm /tmp/client_connect_wlan	
+}
+
+_get_server(){
+	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
+	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
+	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
+	wget -q --timeout=3 \
+		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
+		 -O /dev/null
+	echo $NUM_CLIENTS
+	rm /tmp/client_connect_wlan
+}
+
 ##Sent Client MAC to server Nextify
 get_client_connect_wlan(){
+	_openvpn=`pidof openvpn`
+	if [ -n "$_openvpn" ];then
+		ip_opvn=`ifconfig tun0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }'`
+	fi
+	local _url=$1
 	NEWLINE_IFS='
 '
 	OLD_IFS="$IFS"; IFS=$NEWLINE_IFS
@@ -395,10 +428,8 @@ get_client_connect_wlan(){
 		done
 	done
 	IFS="$OLD_IFS"
-	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;/,/g'| tr a-z A-Z)
-	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}" http://api.nextify.vn/clients_around -O /dev/null
-	echo $client_connect_wlan
-	rm /tmp/client_connect_wlan
+	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;//g'| tr a-z A-Z)
+	NUM_CLIENTS=$(cat /tmp/client_connect_wlan | wc -l)
 }
 
 rssi() {
