@@ -4,7 +4,7 @@
 echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 #write file crontabs
 _nds=/etc/cron_nds
-echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >$_nds
+echo '* * * * * /sbin/wifimedia/controller.sh _detect_clients' >$_nds
 echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >>$_nds
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.wifioto.net/anvui}
