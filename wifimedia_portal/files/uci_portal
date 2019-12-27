@@ -56,6 +56,8 @@ uci -q get wifimedia.@nodogsplash[0] || {
         commit wifimedia
 EOF
 }
+uci set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
+uci commit wifimedia
 
 /etc/init.d/nodogsplash disable
 uci set nodogsplash.@nodogsplash[0].enabled='0'

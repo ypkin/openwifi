@@ -336,7 +336,7 @@ _get_server(){
 		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
 		 -O /dev/null
 	echo $NUM_CLIENTS
-	rm /tmp/client_connect_wlan	 
+	rm /tmp/client_connect_wlan
 }
 
 ##Sent Client MAC to server Nextify
