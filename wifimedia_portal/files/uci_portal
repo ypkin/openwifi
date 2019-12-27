@@ -4,13 +4,8 @@
 echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 #write file crontabs
 _nds=/etc/cron_nds
-#echo '* * * * * /sbin/wifimedia/captive_portal.sh get_captive_portal_clients' >$_nds
-echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >$_nds
+echo '* * * * * /sbin/wifimedia/controller.sh _detect_clients' >$_nds
 echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>$_nds
-#NET_ID="nextify"
-#FW_ZONE="nextify"
-#IFNAME="eth0.1" #VLAN1
-#IFNAME99="eth0.99" #VLAN1
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
 domain_default=${domain:-portal.nextify.vn/splash}
 MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
