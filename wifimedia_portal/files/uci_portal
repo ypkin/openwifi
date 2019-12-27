@@ -4,17 +4,10 @@
 echo -e "nds:x:0:0:nds:/root:/bin/ash" >>/etc/passwd
 #write file crontabs
 _nds=/etc/cron_nds
-#echo '* * * * * /sbin/wifimedia/captive_portal.sh get_captive_portal_clients' >$_nds
 echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >$_nds
-echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>$_nds
-#echo '* * * * * /sbin/wifimedia/controller.sh get_client_connect_wlan' >/etc/crontabs/nds
-#echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat' >>/etc/crontabs/nds && /etc/init.d/cron restart
-#NET_ID="nextify"
-#FW_ZONE="nextify"
-#IFNAME="eth0.1" #VLAN1
-#IFNAME99="eth0.99" #VLAN1
+echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >>$_nds
 domain=`uci -q get wifimedia.@nodogsplash[0].domain`
-domain_default=${domain:-portal.nextify.vn/splash}
+domain_default=${domain:-portal.wifioto.net/anvui}
 MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 #write file splash
 echo '<!doctype html>
@@ -57,12 +50,14 @@ echo '<!doctype html>
 uci -q get wifimedia.@nodogsplash[0] || {
         uci batch <<EOF
         add wifimedia nodogsplash
-		set wifimedia.@nodogsplash[0].domain="portal.nextify.vn/splash"
+		set wifimedia.@nodogsplash[0].domain="portal.wifioto.net/anvui"
 		set wifimedia.@nodogsplash[0].https=0
 		set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
         commit wifimedia
 EOF
 }
+uci set wifimedia.@nodogsplash[0].cpnurl="http://api.nextify.vn/clients_around"
+uci commit wifimedia
 
 /etc/init.d/nodogsplash disable
 uci set nodogsplash.@nodogsplash[0].enabled='0'
