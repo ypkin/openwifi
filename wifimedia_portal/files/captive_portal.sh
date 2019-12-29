@@ -310,7 +310,7 @@ write_login(){
 	<html lang="en">
 	  <head>
 		  <meta charset="utf-8">
-		  <title>$gatewayname</title>
+		  <title>Captive Portal</title>
 	  </head>
 	  <body>
 		  <form id="info" method="POST" action="//'$domain_default'">

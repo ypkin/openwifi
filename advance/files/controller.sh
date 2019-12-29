@@ -49,28 +49,6 @@ wr940v6() { #checking internet
 	fi
 }
 
-
-wa901nd() { #checking internet
-
-	#check gateway
-	ping -c 3 "$gateway" > /dev/null
-	if [ $? -eq "0" ];then
-		cd /sys/devices/platform/leds-gpio/leds/tp-link:green:qss/trigger
-		echo timer > trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:green:qss/trigger
-		echo 1 >/sys/devices/platform/leds-gpio/leds/tp-link:green:qss/brightness
-	fi
-	
-	#checking internet
-	ping -c 10 "8.8.8.8" > /dev/null
-	if [ $? -eq "0" ];then
-		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:green:system/trigger
-	else
-		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:green:system/trigger
-	fi
-}
-
 #ip=`nslookup $dnsctl | grep 'Address' | grep -v '127.0.0.1' | grep -v '8.8.8.8' | grep -v '0.0.0.0'|grep -v '::' | awk '{print $3}'`#
 
 checking (){
@@ -297,14 +275,11 @@ if [ "${curl_result}" -eq 0 ]; then
 	if grep -q "." $licensekey; then
 		cat "$licensekey" | while read line ; do
 			if [ "$(echo $line | grep $_device)" ] ;then
-				#Update License Key
 				uci set wifimedia.@hash256[0].wfm="$(cat /etc/opt/license/wifimedia)"
 				uci commit wifimedia
 				echo "Activated" >/etc/opt/license/status
 				/etc/init.d/wifimedia_check disable
 				rm /etc/init.d/wifimedia_check >/dev/null 2>&1
-				#rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
-				#rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
 				rm /etc/crontabs/wificode >/dev/null 2>&1
 				license_local
 			fi
@@ -476,6 +451,5 @@ if [ $rssi_on == "1" ];then
 	/tmp/denyclient
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
-
 }
 "$@"
