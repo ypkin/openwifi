@@ -78,13 +78,31 @@ _lic(){
 }
 
 device_cfg(){
-
-	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$(cat $hash256 | awk '{print $2}')" ]; then
+	token
+	monitor_port
+	get_client_connect_wlan
+	#get_client_connect_wlan $cpn_url
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}" "$link_config$global_device" -O /tmp/device_cfg
+	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
 		start_cfg
 	fi
 	uci set wifimedia.@hash256[0].value=$hash256
+	#echo "Token "$token
+	#echo "AP MAC "$global_device
+	#echo "mac_clients "$client_connect_wlan
+	#echo "ports_data "$ports_data
+	rm /tmp/monitor_port
+	rm /tmp/client_connect_wlan
 }
-
+token(){
+#token = sha256(mac+secret)
+ secret="(C)WifiMedia2019"
+ mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'`
+ key=${mac_device}${secret}
+ echo $key
+ token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
+ echo $token
+}
 start_cfg(){
 
 touch /tmp/reboot_flag
@@ -378,10 +396,6 @@ _get_server(){
 
 ##Sent Client MAC to server Nextify
 get_client_connect_wlan(){
-	_openvpn=`pidof openvpn`
-	if [ -n "$_openvpn" ];then
-		ip_opvn=`ifconfig tun0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }'`
-	fi
 	local _url=$1
 	NEWLINE_IFS='
 '
