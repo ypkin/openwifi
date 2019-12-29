@@ -9,15 +9,6 @@ ip_public(){
 	#echo $PUBLIC_IP
 }
 
-meshdesk(){
-	dnsctl=$(uci -q get meshdesk.internet1.dns)
-	ip=`nslookup $dnsctl | grep 'Address' | grep -v '127.0.0.1' | grep -v '8.8.8.8' | grep -v '0.0.0.0'|grep -v '::' | awk '{print $3}'`
-	if [ "$ip" != "" ] &&  [ -e /etc/config/meshdesk ];then
-		uci set meshdesk.internet1.ip=$ip
-		uci commit meshdesk
-	fi
-}
-
 checking (){
 	#Clear memory
 	if [ "$(cat /proc/meminfo | grep 'MemFree:' | awk '{print $2}')" -lt 5000 ]; then
@@ -44,7 +35,7 @@ device_cfg(){
 	monitor_port
 	get_client_connect_wlan
 	#get_client_connect_wlan $cpn_url
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${number_client}&ip_opvn=${ip_opvn}" "$link_config""$global_device" -O /tmp/device_cfg
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$global_device" -O /tmp/device_cfg
 	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
 		start_cfg
 	fi
@@ -312,12 +303,12 @@ echo $ports_data
 #wget --post-data="gateway_mac=${global_device}&ports_data=${ports_data}" $link_config -O /dev/null
 #rm /tmp/monitor_port
 }
-_detect_clients(){
+_detect_clients(){ #Support Nextify
 	get_client_connect_wlan
 	_post_clients
 }
 
-heartbeat(){
+heartbeat(){ #Heartbeat Nextify
 	get_client_connect_wlan
 	_get_server
 }
@@ -328,7 +319,7 @@ _post_clients(){
 	rm /tmp/client_connect_wlan	
 }
 
-_get_server(){
+_get_server(){ # Connect to server Nextify
 	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
 	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
@@ -339,7 +330,6 @@ _get_server(){
 	rm /tmp/client_connect_wlan
 }
 
-##Sent Client MAC to server Nextify
 get_client_connect_wlan(){
 	_openvpn=`pidof openvpn`
 	if [ -n "$_openvpn" ];then
@@ -368,11 +358,6 @@ get_client_connect_wlan(){
 	IFS="$OLD_IFS"
 	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;//g'| tr a-z A-Z)
 	NUM_CLIENTS=$(cat /tmp/client_connect_wlan | wc -l)
-	#monitor_port
-	#wget --post-data="&access_point_macs=${global_device}&mac_clients=${client_connect_wlan}&clients=${clients}" $cpn_url -O /dev/null #https://api.telitads.vn/v1/access_points/state
-	#wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&num_clients=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" $_url -O /dev/null #http://api.nextify.vn/clients_around
-	#echo $client_connect_wlan
-	#rm /tmp/client_connect_wlan
 }
 
 action_lan_wlan(){
@@ -404,8 +389,6 @@ license_srv() {
 					echo "Activated" >/etc/opt/license/status
 					/etc/init.d/wifimedia_check disable
 					rm /etc/init.d/wifimedia_check >/dev/null 2>&1
-					#rm /etc/init.d/S30wifimedia_check >/dev/null 2>&1
-					#rm /etc/init.d/K105wifimedia_check >/dev/null 2>&1
 					rm /etc/crontabs/wificode >/dev/null 2>&1
 					license_local
 				fi
