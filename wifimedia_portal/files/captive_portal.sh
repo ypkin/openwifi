@@ -30,6 +30,7 @@ MAC_E0=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 nds_status=`uci -q get nodogsplash.@nodogsplash[0].enabled`
 heartbeat_url=`uci -q get wifimedia.@nodogsplash[0].heartbeat`
 ip_lan_gw=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
+ip_hotspot_gw=$(ifconfig br-hotspot | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1 }')
 source /lib/functions/network.sh
 config_captive_portal() {
 	if [ $nds_status -eq 0 ];then
@@ -76,7 +77,7 @@ config_captive_portal() {
 		uci del nodogsplash.@nodogsplash[0].preauthenticated_users
 		uci add_list nodogsplash.@nodogsplash[0].authenticated_users="allow all"
 		uci commit
-		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to 10.68.255.1"
+		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_hotspot_gw"
 		uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $ip_lan_gw"
 		if network_get_ipaddr addr "wan"; then
 			uci add_list nodogsplash.@nodogsplash[0].preauthenticated_users="allow to $addr"
@@ -137,21 +138,7 @@ captive_portal_restart(){
 }
 
 heartbeat(){
-	ndsctl status > /tmp/ndsctl_status.txt
-	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
-	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
-	NUM_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Client authentications since start' | cut -d':' -f2 | xargs)
-	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
-	TOTAL_CLIENTS=$(cat /tmp/ndsctl_status.txt | grep 'Current clients' | cut -d':' -f2 | xargs)
-	TOTAL_CLIENTS=$(ndsctl status | grep clients | awk '{print $3}')
-	#Value Jsion
-	#wget -q --timeout=3 \
-	#	 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}" \
-	#	 -O /dev/null
 	captive_portal_restart
-	wget -q --timeout=3 \
-	"http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}&total_clients=${TOTAL_CLIENTS}" \
-	 -O /dev/null
 }
 
 get_captive_portal_clients() {
