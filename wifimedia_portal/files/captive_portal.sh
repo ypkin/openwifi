@@ -187,7 +187,7 @@ write_login(){
 	<html lang="en">
 	  <head>
 		  <meta charset="utf-8">
-		  <title>$gatewayname</title>
+		  <title>$Captive Portal</title>
 	  </head>
 	  <body>
 		  <form id="info" method="POST" action="//'$domain_default'">
@@ -225,7 +225,7 @@ dhcp_extension(){
 	uci del network.local.network
 	if [ $relay != "" ];then
 		if [ $NET_ID = "br-hotspot" ];then
-			uci set network.local.ipaddr='10.68.255.1'
+			uci set network.local.ipaddr='$ip_hotspot_gw'
 			uci add_list network.local.network='hotspot'
 			uci set dhcp.hotspot.ignore='1'
 			uci set wireless.default_radio0.network='hotspot'
