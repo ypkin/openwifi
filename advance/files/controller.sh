@@ -77,7 +77,7 @@ _lic(){
 	license_srv
 }
 
-device_cfg(){
+device_cfg(){ #Sent data to server Wifimedia
 	token
 	monitor_port
 	get_client_connect_wlan
@@ -366,24 +366,24 @@ if [ "${curl_result}" -eq 0 ]; then
 	done	
 fi
 }
-##Sent Client MAC to server Nextify
-_detect_clients(){
+
+_detect_clients(){ ##Sent Client MAC to server Nextify
 	get_client_connect_wlan
 	_post_clients
 }
 
-heartbeat(){
+heartbeat(){ #Heartbeat Nextify
 	get_client_connect_wlan
 	_get_server
 }
 
-_post_clients(){
+_post_clients(){ #Sent data to server nextify
 	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
 	echo $client_connect_wlan
 	rm /tmp/client_connect_wlan	
 }
 
-_get_server(){
+_get_server(){ #Sent data to server nextify
 	MAC=$(ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }')
 	UPTIME=$(awk '{printf("%d:%02d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}' /proc/uptime)
 	RAM_FREE=$(grep -i 'MemFree:'  /proc/meminfo | cut -d':' -f2 | xargs)
