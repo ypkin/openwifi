@@ -314,7 +314,7 @@ heartbeat(){ #Heartbeat Nextify
 }
 
 _post_clients(){
-	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
+	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
 	echo $client_connect_wlan
 	rm /tmp/client_connect_wlan	
 }
