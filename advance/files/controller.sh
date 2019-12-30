@@ -272,7 +272,7 @@ device_cfg(){
 	token
 	monitor_port
 	get_client_connect_wlan
-	#get_client_connect_wlan $cpn_url
+	ip_public
 	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$_device" -O /tmp/device_cfg
 	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
 		start_cfg
@@ -313,8 +313,6 @@ heartbeat(){ #Heartbeat Nextify
 
 _post_clients(){
 	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
-	echo $client_connect_wlan
-	rm /tmp/client_connect_wlan	
 }
 
 _get_server(){ # Connect to server Nextify
@@ -324,8 +322,6 @@ _get_server(){ # Connect to server Nextify
 	wget -q --timeout=3 \
 		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
 		 -O /dev/null
-	echo $NUM_CLIENTS
-	rm /tmp/client_connect_wlan
 }
 
 get_client_connect_wlan(){
