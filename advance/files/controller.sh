@@ -311,7 +311,7 @@ heartbeat(){ #Heartbeat Nextify
 	_get_server
 }
 
-_post_clients(){
+_post_clients(){ #$global_device: aa:bb:cc:dd:ee:ff
 	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${NUM_CLIENTS}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
 }
 
@@ -355,7 +355,7 @@ get_client_connect_wlan(){
 	rm /tmp/client_connect_wlan
 }
 
-action_lan_wlan(){
+action_lan_wlan(){ #$_device: aa-bb-cc-dd-ee-ff
 	echo "" > $find_mac_gateway
 	wget -q "${blacklist}" -O $find_mac_gateway
 	curl_result=$?
@@ -371,6 +371,7 @@ action_lan_wlan(){
 
 license_srv() {
 	###MAC WAN:WR940NV6 --Ethernet0 OPENWRT19
+	#$_device: aa-bb-cc-dd-ee-ff
 	echo "" > $licensekey
 	wget -q "${code_srv}" -O $licensekey
 	curl_result=$?
@@ -485,6 +486,7 @@ fi #END RSSI
 }
 
 openvpn(){
+#$_device: aa-bb-cc-dd-ee-ff
 cfg_ovpn=/etc/openvpn/wifimedia.ovpn
 srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
 certificate=wifimedia
