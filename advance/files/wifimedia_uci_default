@@ -298,8 +298,9 @@ echo -e "wifimedia\nwifimedia" | passwd root
 #End
 
 #Cron heartbeat
-echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/root
-
+#echo '*/2 * * * * /sbin/wifimedia/controller.sh heartbeat' >/tmp/wifimedia_cronjob #For Nextify
+echo '*/2 * * * * /sbin/wifimedia/controller.sh device_cfg' >/tmp/wifimedia_cronjob #Monitor
+crontab /tmp/wifimedia_cronjob -u root
 #Info
 CODENAME="wifimedia"
 if [ -f "/etc/codename" ]; then
