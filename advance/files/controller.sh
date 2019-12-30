@@ -20,42 +20,6 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
-_boot(){
-	checking
-	action_lan_wlan
-	openvpn
-}
-
-_lic(){
-	license_srv
-}
-
-device_cfg(){
-	token
-	monitor_port
-	get_client_connect_wlan
-	#get_client_connect_wlan $cpn_url
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$global_device" -O /tmp/device_cfg
-	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
-		start_cfg
-	fi
-	uci set wifimedia.@hash256[0].value=$hash256
-	#echo "Token "$token
-	#echo "AP MAC "$global_device
-	#echo "mac_clients "$client_connect_wlan
-	#echo "ports_data "$ports_data
-	rm /tmp/monitor_port
-	rm /tmp/client_connect_wlan
-}
-token(){
-	token = sha256(mac+secret)
-	secret="(C)WifiMedia2019"
-	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
-	key=${mac_device}${secret}
-	echo $key
-	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
-	echo $token
-}
 start_cfg(){
 
 touch /tmp/reboot_flag
@@ -294,14 +258,50 @@ fi
 	
 }
 
+_boot(){
+	checking
+	action_lan_wlan
+	openvpn
+}
+
+_lic(){
+	license_srv
+}
+
+device_cfg(){
+	token
+	monitor_port
+	get_client_connect_wlan
+	#get_client_connect_wlan $cpn_url
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$global_device" -O /tmp/device_cfg
+	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
+		start_cfg
+	fi
+	uci set wifimedia.@hash256[0].value=$hash256
+	#echo "Token "$token
+	#echo "AP MAC "$global_device
+	#echo "mac_clients "$client_connect_wlan
+	#echo "ports_data "$ports_data
+	rm /tmp/monitor_port
+	rm /tmp/client_connect_wlan
+}
+token(){
+	token = sha256(mac+secret)
+	secret="(C)WifiMedia2019"
+	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
+	key=${mac_device}${secret}
+	echo $key
+	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
+	echo $token
+}
+
 monitor_port(){
-swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' | while read line;do
-	echo "$line," >>/tmp/monitor_port
-done
-ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
-echo $ports_data
-#wget --post-data="gateway_mac=${global_device}&ports_data=${ports_data}" $link_config -O /dev/null
-#rm /tmp/monitor_port
+	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' | while read line;do
+		echo "$line," >>/tmp/monitor_port
+	done
+	ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
+	echo $ports_data
+	rm /tmp/monitor_port
 }
 _detect_clients(){ #Support Nextify
 	get_client_connect_wlan
@@ -514,5 +514,4 @@ EOF
 		/etc/init.d/openvpn stop ${certificate}
 	fi
 }
-
 "$@"
