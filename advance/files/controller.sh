@@ -30,12 +30,13 @@ touch /tmp/clientdetect
 local key
 local value
 cat $response_file | while read line ; do
-	key=$(echo "$line" | cut -f 1 -d =)
-	value=$(echo "$line" | cut -f 2- -d =)
+	key=$(echo $line | cut -f 1 -d =)
+	value=$(echo $line | cut -f 2- -d =)
 	
 	#Cau hinh hostname
 	if [ "$key" = "device.hostname" ];then
 		uci set system.@system[0].hostname="$value"
+		echo $value
 	#Mat khau thiet bi	
 	elif [ "$key" = "device.passwd" ];then
 		echo -e "$value\n$value" | passwd root
@@ -273,7 +274,7 @@ device_cfg(){
 	monitor_port
 	get_client_connect_wlan
 	ip_public
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$_device" -O /tmp/device_cfg
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}&mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}&ip_opvn=${ip_opvn}" "$link_config$_device" -O $response_file
 	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
 		start_cfg
 	fi
@@ -284,7 +285,7 @@ device_cfg(){
 	#echo "ports_data "$ports_data
 }
 token(){
-	token = sha256(mac+secret)
+	#token = sha256(mac+secret)
 	secret="(C)WifiMedia2019"
 	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
 	key=${mac_device}${secret}
