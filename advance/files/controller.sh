@@ -6,7 +6,7 @@
 
 ip_public(){
 	PUBLIC_IP=`wget http://ipecho.net/plain -O - -q ; echo`
-	#echo $PUBLIC_IP
+	echo $PUBLIC_IP
 }
 
 wr940v5() { #checking internet
@@ -71,6 +71,7 @@ touch /tmp/network_flag
 touch /tmp/cpn_flag
 touch /tmp/scheduled_flag
 touch /tmp/clientdetect
+response_file1=/tmp/wifimedia
 local key
 local value
 cat $response_file | while read line ; do
@@ -91,6 +92,7 @@ cat $response_file | while read line ; do
 	elif [ "$key" = "wireless.radio2G.enable" ];then
 		echo 1 >/tmp/network_flag
 		uci set wireless.radio0.disabled="$value"
+		echo $value
 	elif [ "$key" = "wireless.radio2G.channel" ];then
 		uci set wireless.radio0.channel="$value"
 	elif [ "$key" = "wireless.radio2G.htmode" ];then
@@ -269,7 +271,7 @@ _lic(){
 	license_srv
 }
 
-device_cfg(){
+wifimedia_heartbeat(){
 	token
 	monitor_port
 	get_client_connect_wlan
