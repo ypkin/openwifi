@@ -3,13 +3,6 @@
 rnd=`cat /dev/urandom | tr -dc 'A-Z' | head -c1`
 model_hardware=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
 newifi3=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | awk '{print $1}')
-uci -q get system.@reset_all[0] || {
-	uci batch <<-EOF
-	add system reset_all
-	set system.@reset_all[0]=reset_all
-	commit system
-EOF
-}
 
 ###Sync
 uci -q get wifimedia.@sync[0] || {
