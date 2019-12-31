@@ -23,10 +23,9 @@ device_fw=$(cat /sys/class/ieee80211/phy0/macaddress |sed 's/:/-/g' | tr a-z A-Z
 # Defines the URL to check the firmware at
 url_fw="http://firmware.wifimedia.com.vn/tplink/$board_name.bin"
 url_v="http://firmware.wifimedia.com.vn/tplink/version"
-response_file=/tmp/device_cfg
+response_file=/tmp/wifimedia
 touch $response_file
 hash256=$(sha256sum $response_file | awk '{print $1}')
 #echo "Waiting a bit..."
 #sleep $(head -30 /dev/urandom | tr -dc "0123456789" | head -c1)
 if [ ! -d "/tmp/upgrade" ]; then mkdir /tmp/upgrade; fi
-
