@@ -254,7 +254,7 @@ fi
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
 	wifi down && wifi up
 	/etc/init.d/network restart
-	echo "upwifi"
+	echo "wifi update"
 fi
 	
 }
