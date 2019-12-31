@@ -262,7 +262,7 @@ _lic(){
 	license_srv
 }
 
-device_cfg(){ #Sent data to server Wifimedia
+wifimedia_heartbeat(){ #Sent data to server Wifimedia
 	token
 	monitor_port
 	get_client_connect_wlan
@@ -276,8 +276,6 @@ device_cfg(){ #Sent data to server Wifimedia
 	#echo "AP MAC "$global_device
 	#echo "mac_clients "$client_connect_wlan
 	#echo "ports_data "$ports_data
-	rm /tmp/monitor_port
-	rm /tmp/client_connect_wlan
 }
 token(){
 #token = sha256(mac+secret)
@@ -287,6 +285,15 @@ token(){
  echo $key
  token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
  echo $token
+}
+
+monitor_port(){
+	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' | while read line;do
+		echo "$line," >>/tmp/monitor_port
+	done
+	ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
+	echo $ports_data
+	rm /tmp/monitor_port
 }
 
 license_srv() {
@@ -385,7 +392,6 @@ heartbeat(){ #Heartbeat Nextify
 _post_clients(){ #Sent data to server nextify
 	wget --post-data="clients=${client_connect_wlan}&gateway_mac=${global_device}&number_client=${number_client}&ip_opvn=${ip_opvn}" $cpn_url -O /dev/null #http://api.nextify.vn/clients_around
 	echo $client_connect_wlan
-	rm /tmp/client_connect_wlan	
 }
 
 _get_server(){ #Sent data to server nextify
@@ -395,8 +401,6 @@ _get_server(){ #Sent data to server nextify
 	wget -q --timeout=3 \
 		 "http://portal.nextify.vn/heartbeat?mac=${MAC}&uptime=${UPTIME}&num_clients=${NUM_CLIENTS}" \
 		 -O /dev/null
-	echo $NUM_CLIENTS
-	rm /tmp/client_connect_wlan
 }
 
 ##Sent Client MAC to server Nextify
@@ -424,6 +428,7 @@ get_client_connect_wlan(){
 	IFS="$OLD_IFS"
 	client_connect_wlan=$(cat /tmp/client_connect_wlan | xargs| sed 's/;//g'| tr a-z A-Z)
 	NUM_CLIENTS=$(cat /tmp/client_connect_wlan | wc -l)
+	rm /tmp/client_connect_wlan
 }
 
 rssi() {
