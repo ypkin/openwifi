@@ -19,7 +19,7 @@ uci -q get wifimedia.@builddate[0] || {
 	uci batch <<-EOF
 	add wifimedia builddate
 	set wifimedia.@builddate[0]=builddate
-	set wifimedia.@builddate[0].date=23/12/2019
+	set wifimedia.@builddate[0].date=31/12/2019
 	commit wifimedia
 EOF
 }
@@ -166,7 +166,7 @@ echo -e "wifimedia\nwifimedia" | passwd root
 #End
 
 #Cron heartbeat
-echo '* * * * * /sbin/wifimedia/controller.sh heartbeat' >/etc/crontabs/root
+echo '* * * * * /sbin/wifimedia/controller.sh wifimedia_heartbeat' >/etc/crontabs/root
 
 #Info
 CODENAME="wifimedia"
