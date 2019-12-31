@@ -31,7 +31,7 @@ local key
 local value
 cat $response_file | while read line ; do
 	key=$(echo $line | cut -f 1 -d =)
-	value=$(echo $line | cut -f 2- -d =)
+	value=$(echo $line | cut -f 2- -d = | sed 's/"//g')
 	
 	#Cau hinh hostname
 	if [ "$key" = "device.hostname" ];then
@@ -64,17 +64,15 @@ cat $response_file | while read line ; do
 			uci set wireless.default_radio0.encryption="psk2"
 		fi
 	#chuyen dung chuan cache	
-	elif [ "$key" = "wireless.okc2G=" ];then
-		if [ "$value" =  "1" ];then
+	elif [ "$key" = "wireless.okc2G" ];then
 			uci set wireless.default_radio0.rsn_preauth="$value"
-			uci set wireless.default_radio0.ieee80211r ="0"
-			uci set wireless.default_radio0.ft_over_ds="0"
-			uci set wireless.default_radio0.ft_psk_generate_local="0"
-		fi	
+			uci delete wireless.default_radio0.ieee80211r >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_over_ds >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_psk_generate_local >/dev/null 2>&1
 	#Chuyen dung 802.1R	
 	elif [ "$key" = "wireless.ft2G" ];then
 		if [ "$value" =  "1" ];then
-			uci set wireless.default_radio0.rsn_preauth="0"
+			uci delete wireless.default_radio0.rsn_preauth >/dev/null 2>&1
 			uci set wireless.default_radio0.ieee80211r ="1"
 			uci set wireless.default_radio0.ft_over_ds="1"
 			uci set wireless.default_radio0.ft_psk_generate_local="1"
@@ -107,18 +105,18 @@ cat $response_file | while read line ; do
 			uci set wireless.default_radio1.encryption="psk2"
 		fi
 	#chuyen dung chuan cache	
-	elif [ "$key" = "wireless.okc5G=" ];then
+	elif [ "$key" = "wireless.okc5G" ];then
 		if [ "$value" =  "1" ];then
 			uci set wireless.default_radio1.rsn_preauth="$value"
-			uci set wireless.default_radio1.ieee80211r ="0"
-			uci set wireless.default_radio1.ft_over_ds="0"
-			uci set wireless.default_radio1.ft_psk_generate_local="0"
+			uci delete wireless.default_radio1.ieee80211r >/dev/null 2>&1
+			uci delete wireless.default_radio1.ft_over_ds >/dev/null 2>&1
+			uci delete wireless.default_radio1.ft_psk_generate_local >/dev/null 2>&1
 		fi	
 	#Chuyen dung 802.1R	
 	elif [ "$key" = "wireless.ft5G" ];then
 		if [ "$value" =  "1" ];then
-			uci set wireless.default_radio1.rsn_preauth="0"
-			uci set wireless.default_radio1.ieee80211r ="1"
+			uci delete wireless.default_radio1.rsn_preauth >/dev/null 2>&1
+			uci set wireless.default_radio1.ieee80211r="1"
 			uci set wireless.default_radio1.ft_over_ds="1"
 			uci set wireless.default_radio1.ft_psk_generate_local="1"
 		fi	
@@ -254,7 +252,9 @@ if [ $(cat /tmp/clientdetect) -eq 1 ]; then
 fi
 
 if [ $(cat /tmp/network_flag) -eq 1 ]; then
+	wifi down && wifi up
 	/etc/init.d/network restart
+	echo "upwifi"
 fi
 	
 }
