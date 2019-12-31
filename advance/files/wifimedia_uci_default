@@ -10,9 +10,11 @@ uci -q get wifimedia.@sync[0] || {
 	set wifimedia.@sync[0]=sync
 	set wifimedia.@sync[0].version=2.1.0
 	#set wifimedia.@sync[0].domain="crm.wifimedia.com.vn"
+	set wifimedia.@sync[0].server="http://monitor.wifimedia.vn/api/monitoring/"
 	commit wifimedia
 EOF
 }
+
 
 ###Build Date
 uci -q get wifimedia.@builddate[0] || {

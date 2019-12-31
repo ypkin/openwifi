@@ -9,8 +9,53 @@ ip_public(){
 	#echo $PUBLIC_IP
 }
 
+wr940v5() { #checking internet
+
+	#check gateway
+	ping -c 3 "$gateway" > /dev/null
+	if [ $? -eq "0" ];then
+		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:qss/trigger
+	else
+		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:*:qss/trigger
+	fi
+	
+	#checking internet
+	ping -c 10 "8.8.8.8" > /dev/null
+	if [ $? -eq "0" ];then
+		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:*:wan/trigger
+	else
+		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:*:wan/trigger
+	fi
+
+}
+
+wr940v6() { #checking internet
+
+	#check gateway
+	ping -c 3 "$gateway" > /dev/null
+	if [ $? -eq "0" ];then
+		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/trigger
+	else
+		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/trigger
+		echo 1 >/sys/devices/platform/leds-gpio/leds/tp-link:orange:diag/brightness
+	fi
+	
+	#checking internet
+	ping -c 10 "8.8.8.8" > /dev/null
+	if [ $? -eq "0" ];then
+		echo timer >/sys/devices/platform/leds-gpio/leds/tp-link:blue:wan/trigger
+	else
+		echo none >/sys/devices/platform/leds-gpio/leds/tp-link:blue:wan/trigger
+	fi
+}
+
+#ip=`nslookup $dnsctl | grep 'Address' | grep -v '127.0.0.1' | grep -v '8.8.8.8' | grep -v '0.0.0.0'|grep -v '::' | awk '{print $3}'`#
+
 checking (){
-	#Clear memory
+	model=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
+	if [ "$model" == "TL-WR940N_v6" ];then
+		wr940v6
+	fi	
 	if [ "$(cat /proc/meminfo | grep 'MemFree:' | awk '{print $2}')" -lt 5000 ]; then
 		echo "Clear Cach"
 		free && sync && echo 3 > /proc/sys/vm/drop_caches && free
@@ -19,7 +64,6 @@ checking (){
 	#pidhostapd=`pidof hostapd`
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
-
 start_cfg(){
 
 touch /tmp/reboot_flag
@@ -83,50 +127,6 @@ cat $response_file | while read line ; do
 	#Set Max Client	
 	elif [ "$key" = "wireless.maxclients2G" ];then
 		uci set wireless.default_radio0.maxassoc="$value"
-
-############cau hinh 5G
-	elif [ "$key" = "wireless.radio5G.enable" ];then
-		echo 1 >/tmp/network_flag
-		uci set wireless.radio1.disabled="$value"
-	elif [ "$key" = "wireless.radio5G.channel" ];then
-		uci set wireless.radio1.channel="$value"
-	elif [ "$key" = "wireless.radio5G.htmode" ];then
-		uci set wireless.radio1.htmode="$value"
-	elif [ "$key" = "wireless.radio5G.txpower" ];then
-		uci set wireless.radio1.txpower="$value"
-	elif [ "$key" = "wireless.ssid5G" ];then
-		uci set wireless.default_radio1.ssid="$value"
-	elif [ "$key" = "wireless.passwd5G" ];then
-		if [ "$value" = "" ];then
-			uci set wireless.default_radio1.key=""
-			uci set wireless.default_radio1.encryption="none"
-		else
-			uci set wireless.default_radio1.key="$value"
-			uci set wireless.default_radio1.encryption="psk2"
-		fi
-	#chuyen dung chuan cache	
-	elif [ "$key" = "wireless.okc5G" ];then
-		if [ "$value" =  "1" ];then
-			uci set wireless.default_radio1.rsn_preauth="$value"
-			uci delete wireless.default_radio1.ieee80211r >/dev/null 2>&1
-			uci delete wireless.default_radio1.ft_over_ds >/dev/null 2>&1
-			uci delete wireless.default_radio1.ft_psk_generate_local >/dev/null 2>&1
-		fi	
-	#Chuyen dung 802.1R	
-	elif [ "$key" = "wireless.ft5G" ];then
-		if [ "$value" =  "1" ];then
-			uci delete wireless.default_radio1.rsn_preauth >/dev/null 2>&1
-			uci set wireless.default_radio1.ieee80211r="1"
-			uci set wireless.default_radio1.ft_over_ds="1"
-			uci set wireless.default_radio1.ft_psk_generate_local="1"
-		fi	
-	##Map SSID to net/plain LAN or WAN	
-	elif [ "$key" = "wireless.network5G" ];then
-		uci set wireless.default_radio0.network="$value"
-	#Set Max Client	
-	elif [ "$key" = "wireless.maxclients5G" ];then
-		uci set wireless.default_radio1.maxassoc="$value"
-	
 	##Cau hinh switch 5 port		
 	elif [ "$key" = "network.switch" ];then
 		echo 1 >/tmp/network_flag
@@ -182,11 +182,11 @@ cat $response_file | while read line ; do
 			uci set network.wan="interface"
 			uci set network.wan.proto="static"
 			uci set network.wan.type="bridge"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0"		
 		else ##DHCP Client nhan IP
 			uci delete network.wan
 			uci set network.wan.proto="dhcp"
-			uci set network.wan.ifname="eth1"		
+			uci set network.wan.ifname="eth0"		
 		fi
 	elif [  "$key" = "network.lan.ip" ];then
 		uci set network.lan.ipaddr="$value"
@@ -484,32 +484,5 @@ if [ $rssi_on == "1" ];then
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
 
-}
-
-openvpn(){
-#$_device: aa-bb-cc-dd-ee-ff
-cfg_ovpn=/etc/openvpn/wifimedia.ovpn
-srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
-certificate=wifimedia
-uci -q get openvpn.@$certificate[0] || {
-uci batch <<-EOF
-	add openvpn $certificate
-	set openvpn.${certificate}=openvpn
-	set openvpn.${certificate}.config="$cfg_ovpn"
-	set openvpn.${certificate}.enabled="1"
-	commit openvpn
-EOF
-}
-	wget -q "${srv_ovpn}" -O $cfg_ovpn
-	curl_result=$?
-	if [ "${curl_result}" -eq 0 ]; then
-		uci set openvpn.${certificate}.enabled="1"
-		uci commit openvpn
-		/etc/init.d/openvpn start ${certificate}
-	else
-		uci set openvpn.${certificate}.enabled="1"
-		uci commit openvpn
-		/etc/init.d/openvpn stop ${certificate}
-	fi
 }
 "$@"
