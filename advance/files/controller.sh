@@ -53,7 +53,6 @@ wr940v6() { #checking internet
 
 checking (){
 	model=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-50 | tr ' ' '_')
-	#eap_name=$(cat /proc/cpuinfo | grep 'machine' | cut -f2 -d ":" | cut -b 10-20)
 	if [ "$model" == "TL-WR940N_v6" ];then
 		wr940v6
 	fi	
@@ -67,42 +66,6 @@ checking (){
 	#if [ -z $pidhostapd ];then echo "Wireless Off" >/tmp/wirelessstatus;else echo "Wireless On" >/tmp/wirelessstatus;fi
 }
 
-_boot(){
-	checking
-	action_lan_wlan
-	#openvpn
-}
-
-_lic(){
-	license_srv
-}
-
-device_cfg(){ #Sent data to server Wifimedia
-	token
-	monitor_port
-	get_client_connect_wlan
-	#get_client_connect_wlan $cpn_url
-	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}" "$link_config$global_device" -O /tmp/device_cfg
-	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
-		start_cfg
-	fi
-	uci set wifimedia.@hash256[0].value=$hash256
-	#echo "Token "$token
-	#echo "AP MAC "$global_device
-	#echo "mac_clients "$client_connect_wlan
-	#echo "ports_data "$ports_data
-	rm /tmp/monitor_port
-	rm /tmp/client_connect_wlan
-}
-token(){
-#token = sha256(mac+secret)
- secret="(C)WifiMedia2019"
- mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'`
- key=${mac_device}${secret}
- echo $key
- token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
- echo $token
-}
 start_cfg(){
 
 touch /tmp/reboot_flag
@@ -114,7 +77,7 @@ local key
 local value
 cat $response_file | while read line ; do
 	key=$(echo "$line" | cut -f 1 -d =)
-	value=$(echo "$line" | cut -f 2- -d =)
+	value=$(echo "$line" | cut -f 2- -d = |sed 's/"//g')
 	
 	#Cau hinh hostname
 	if [ "$key" = "device.hostname" ];then
@@ -146,26 +109,30 @@ cat $response_file | while read line ; do
 			uci set wireless.default_radio0.encryption="psk2"
 		fi
 	#chuyen dung chuan cache	
-	elif [ "$key" = "wireless.okc2G=" ];then
+	elif [ "$key" = "wireless.okc2G" ];then
+		echo 1 >/tmp/network_flag
 		if [ "$value" =  "1" ];then
 			uci set wireless.default_radio0.rsn_preauth="$value"
-			uci set wireless.default_radio0.ieee80211r ="0"
-			uci set wireless.default_radio0.ft_over_ds="0"
-			uci set wireless.default_radio0.ft_psk_generate_local="0"
+			uci delete wireless.default_radio0.ieee80211r >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_over_ds >/dev/null 2>&1
+			uci delete wireless.default_radio0.ft_psk_generate_local >/dev/null 2>&1
 		fi	
 	#Chuyen dung 802.1R	
 	elif [ "$key" = "wireless.ft2G" ];then
+		echo 1 >/tmp/network_flag
 		if [ "$value" =  "1" ];then
-			uci set wireless.default_radio0.rsn_preauth="0"
-			uci set wireless.default_radio0.ieee80211r ="1"
+			uci delete wireless.default_radio0.rsn_preauth >/dev/null 2>&1
+			uci set wireless.default_radio0.ieee80211r="1"
 			uci set wireless.default_radio0.ft_over_ds="1"
 			uci set wireless.default_radio0.ft_psk_generate_local="1"
 		fi	
 	##Map SSID to net/plain LAN or WAN	
 	elif [ "$key" = "wireless.network2G" ];then
+		echo 1 >/tmp/network_flag
 		uci set wireless.default_radio0.network="$value"
 	#Set Max Client	
 	elif [ "$key" = "wireless.maxclients2G" ];then
+		echo 1 >/tmp/network_flag
 		uci set wireless.default_radio0.maxassoc="$value"
 	
 	##Cau hinh switch 5 port		
@@ -278,10 +245,48 @@ else
   echo "Stop CPN"
   /etc/init.d/nodogsplash stop
 fi
-if [ $(cat tmp/cpn_flag) -eq 1 ]; then
-	echo "restarting conjob"
+
+if [ $(cat /tmp/network_flag) -eq 1 ]; then
+	wifi down && wifi up
 	crontab /etc/cron_nds -u nds && /etc/init.d/cron restart
 fi		
+}
+
+
+_boot(){
+	checking
+	action_lan_wlan
+}
+
+_lic(){
+	license_srv
+}
+
+device_cfg(){ #Sent data to server Wifimedia
+	token
+	monitor_port
+	get_client_connect_wlan
+	ip_public
+	wget --post-data="token=${token}&gateway_mac=${global_device}&isp=${PUBLIC_IP}&ip_wan=${ip_wan}&ip_lan=${ip_lan}&diagnostics=${diagnostics}&ports_data=${ports_data}mac_clients=${client_connect_wlan}&number_client=${NUM_CLIENTS}" "$link_config$global_device" -O $response_file
+	if [ "$(uci -q get wifimedia.@hash256[0].value)" != "$hash256" ]; then
+		start_cfg
+	fi
+	uci set wifimedia.@hash256[0].value=$hash256
+	#echo "Token "$token
+	#echo "AP MAC "$global_device
+	#echo "mac_clients "$client_connect_wlan
+	#echo "ports_data "$ports_data
+	rm /tmp/monitor_port
+	rm /tmp/client_connect_wlan
+}
+token(){
+#token = sha256(mac+secret)
+ secret="(C)WifiMedia2019"
+ mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'`
+ key=${mac_device}${secret}
+ echo $key
+ token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
+ echo $token
 }
 
 license_srv() {
