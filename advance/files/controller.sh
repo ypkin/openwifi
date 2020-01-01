@@ -490,14 +490,14 @@ cfg_ovpn=/etc/openvpn/wifimedia.ovpn
 srv_ovpn="http://openvpn.wifimedia.vn/$_device.ovpn"
 certificate=wifimedia
 uci -q get openvpn.@$certificate[0] || {
-uci batch <<-EOF
-	add openvpn $certificate
-	set openvpn.${certificate}=openvpn
-	set openvpn.${certificate}.config="$cfg_ovpn"
-	set openvpn.${certificate}.enabled="1"
-	commit openvpn
-EOF
-}
+	uci batch <<-EOF
+		add openvpn $certificate
+		set openvpn.${certificate}=openvpn
+		set openvpn.${certificate}.config="$cfg_ovpn"
+		set openvpn.${certificate}.enabled="1"
+		commit openvpn
+	EOF
+	}
 	wget -q "${srv_ovpn}" -O $cfg_ovpn
 	curl_result=$?
 	if [ "${curl_result}" -eq 0 ]; then
