@@ -271,7 +271,7 @@ _lic(){
 	license_srv
 }
 
-wifimedia_heartbeat(){
+srv(){
 	token
 	monitor_port
 	get_client_connect_wlan

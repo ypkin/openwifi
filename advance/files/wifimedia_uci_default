@@ -15,7 +15,6 @@ uci -q get wifimedia.@sync[0] || {
 EOF
 }
 
-
 ###Build Date
 uci -q get wifimedia.@builddate[0] || {
 	uci batch <<-EOF
@@ -168,7 +167,7 @@ echo -e "wifimedia\nwifimedia" | passwd root
 #End
 
 #Cron heartbeat
-echo '* * * * * /sbin/wifimedia/controller.sh wifimedia_heartbeat' >/etc/crontabs/root
+echo '* * * * * /sbin/wifimedia/controller.sh srv' >/etc/crontabs/root
 
 #Info
 CODENAME="wifimedia"
