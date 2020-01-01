@@ -242,10 +242,8 @@ dhcp_extension(){
 		NET_ID=`uci -q get wifimedia.@nodogsplash[0].network`
 		if [ $NET_ID = "br-hotspot" ];then
 			uci set wireless.default_radio0.network='hotspot'
-			uci set wireless.default_radio1.network='hotspot'
 		else
 			uci set wireless.default_radio0.network='lan'
-			uci set wireless.default_radio1.network='lan'
 		fi	
 		uci set dhcp.lan.ignore='0'
 		uci set dhcp.hotspot.ignore='0'
@@ -254,7 +252,7 @@ dhcp_extension(){
 	uci commit && wifi up
 }
 cpn_detect(){
-	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpnurl`
+	cpn_status=`uci -q get wifimedia.@nodogsplash[0].cpn_clients`
 	if [ $cpn_status -eq 0 ];then
 		echo '* * * * * /sbin/wifimedia/captive_portal.sh heartbeat'>/etc/crontabs/nds && /etc/init.d/cron restart
 	fi
