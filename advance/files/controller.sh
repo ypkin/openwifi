@@ -289,13 +289,11 @@ token(){
 	secret="(C)WifiMedia2019"
 	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
 	key=${mac_device}${secret}
-	echo $key
 	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
-	echo $token
 }
 
 monitor_port(){
-	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' | while read line;do
+	swconfig dev switch0 show |  grep 'link'| awk '{print $2, $3}' |head -4| while read line;do
 		echo "$line," >>/tmp/monitor_port
 	done
 	ports_data=$(cat /tmp/monitor_port | xargs| sed 's/,/;/g' | sed 's/ port:/ /g' | sed 's/ link:/:/g' )
