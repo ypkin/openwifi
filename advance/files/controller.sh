@@ -264,7 +264,7 @@ fi
 _boot(){
 	checking
 	action_lan_wlan
-	openvpn
+	#openvpn
 }
 
 _lic(){
@@ -291,9 +291,7 @@ token(){
 	secret="(C)WifiMedia2019"
 	mac_device=`ifconfig eth0 | grep 'HWaddr' | awk '{ print $5 }'| sed 's/:/-/g'`
 	key=${mac_device}${secret}
-	echo $key
 	token=$(echo -n $(echo $key) | sha256sum | awk '{print $1}')
-	echo $token
 }
 
 monitor_port(){
