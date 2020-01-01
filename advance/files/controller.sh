@@ -483,6 +483,5 @@ if [ $rssi_on == "1" ];then
 	/tmp/denyclient
 	echo "#!/bin/sh" >/tmp/denyclient
 fi #END RSSI
-
 }
 "$@"
